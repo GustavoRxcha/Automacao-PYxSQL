@@ -1,0 +1,25 @@
+# __pycache__ do Python
+__pycache__/
+*.py[cod]
+
+# Arquivos temporários e backups
+*.swp
+*.tmp
+*.bak
+
+# Arquivos do VSCode
+.vscode/
+
+# Arquivos de log
+*.log
+
+# Banco de dados SQLite (caso utilize)
+*.sqlite3
+
+# Ambiente virtual Python (caso use)
+env/
+venv/
+
+# Arquivos de teste que não precisam ser versionados
+TESTEINTEGRARNOTA.PY
+testecaixa.py
