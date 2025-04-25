@@ -1,29 +1,33 @@
 import pyodbc
 
-def conectar_banco(filial):
+def gerar_ip(filial):
 
         filial = int(filial)
 
         if 0 <= filial <= 199 or filial == 241:
-            return f"10.16.{filial}.24"
+            return f"10.16.{filial}."
 
         elif 200 <= filial <= 240:
             ultimos_digitos = filial % 100
-            return f"10.17.{ultimos_digitos}.24"
+            return f"10.17.{ultimos_digitos}."
         elif 242 <= filial <= 299:
             ultimos_digitos = filial % 100
-            return f"10.17.{ultimos_digitos}.24"
+            return f"10.17.{ultimos_digitos}."
 
         elif 300 <= filial <= 399:
             ultimos_digitos = filial % 100
-            return f"10.17.1{ultimos_digitos}.24"
+            return f"10.17.1{ultimos_digitos}."
 
         elif 400 <= filial <= 499:
             ultimos_digitos = filial % 100
-            return f"10.18.{ultimos_digitos}.24"
+            return f"10.18.{ultimos_digitos}."
 
         else:
             return None
+
+def alterar_filial(self, home):
+    self.controller.filial = ""  # Zera a filial/IP
+    self.controller.mostrar_tela(home)
 
 # --------------------------------------------------------------------------------
 
@@ -95,9 +99,10 @@ def primary_cheio(conn):
 
         cursor = conn.cursor()
 
-        select_erpm_upload = cursor.execute("SELECT ENVIADO FROM ERPM_UPLOAD WITH (NOLOCK) WHERE ENVIADO = 'S'").fetchone()
+        select_erpm_upload = cursor.execute("SELECT ENVIADO FROM ERPM_UPLOAD WITH WHERE ENVIADO = 'S'").fetchone()
         if select_erpm_upload:
-            #curso.execute com DELETE ERPM_UPLOAD FROM ERPM_UPLOAD WITH (NOLOCK) WHERE ENVIADO = 'S'
+            cursor.execute("DELETE ERPM_UPLOAD FROM ERPM_UPLOAD WITH WHERE ENVIADO = 'S'") 
+            conn.commit()
             return "Feita a limpeza de Log's\n\nCorreção de Primary cheio!"
         else:
                 return "Não há arquivos para limpar."
@@ -110,6 +115,9 @@ def atualizar_biometria(conn, matricula):
 
 
     cursor = conn.cursor()
+
+    # cursor.execute(atualizar a biometria)
+    # conn.commit()
 
     cursor.execute("""
                    SELECT OPERADOR, NOME, ABERTURA_CAIXA, FECHAMENTO_CAIXA, CANCELAMENTO_CUPOM, SANGRIA_CAIXA, SUPERVISOR
