@@ -1,0 +1,113 @@
+USE [PBS_LOCAL_DADOS]
+ 
+--- Declarando as Variáveis 
+--- ...
+ 
+DECLARE @NF_COMPRA     VARCHAR(15) = ?
+	   ,@PEDIDO_COMPRA VARCHAR(15) = ?
+	   
+ 
+ 
+--- Consulta na consistência e no tempo do Pedido
+--- ...
+ 
+EXEC ('IF NOT EXISTS (SELECT TOP 1 1 
+					    FROM NF_COMPRA AS A JOIN PEDIDOS_COMPRAS AS B ON A.PEDIDO_COMPRA = B.PEDIDO_COMPRA
+					   WHERE A.NF_COMPRA     = ''' + @NF_COMPRA + ''' AND B.PEDIDO_COMPRA = ''' + @PEDIDO_COMPRA + ''')
+					  RAISERROR(''Não foi possível encontrar uma relação de dados entre as tabelas NF_COMPRA e PEDIDOS_COMPRAS no sistema central. Por favor, consulte os formulários correspondentes para obter um melhor entendimento ou revise as informações fornecidas nas variáveis locais.'', 15, 1)') AT [RETAGUARDA]
+ 
+EXEC ('IF (SELECT CONVERT(DATE, DATA_HORA) FROM PEDIDOS_COMPRAS WHERE PEDIDO_COMPRA = ''' + @PEDIDO_COMPRA + ''') >= CAST(GETDATE() -60 AS DATE) OR
+	      (SELECT MOVIMENTO FROM NF_COMPRA WHERE NF_COMPRA = ''' + @NF_COMPRA + ''') >= CAST(GETDATE() -60 AS DATE)
+	   RAISERROR(''O pedido de compra não possui um período de movimentação menor que 60 dias, o insert não faz sentido. Por favor, contate um analista responsável.'', 15, 1)
+	   RETURN;') AT [RETAGUARDA]
+ 
+ 
+---  Exclui os dados no banco local ---------------------------------------------------------------------
+--- ...
+ 
+IF EXISTS (SELECT TOP 1 1 FROM NF_COMPRA WHERE NF_COMPRA = @NF_COMPRA) 
+   BEGIN   DELETE		  FROM NF_COMPRA WHERE NF_COMPRA = @NF_COMPRA END
+ 
+IF EXISTS (SELECT TOP 1 1 FROM PEDIDOS_COMPRAS WHERE PEDIDO_COMPRA = @PEDIDO_COMPRA) 
+   BEGIN   DELETE		  FROM PEDIDOS_COMPRAS WHERE PEDIDO_COMPRA = @PEDIDO_COMPRA END
+ 
+IF EXISTS (SELECT TOP 1 1 FROM PEDIDOS_COMPRAS_PRODUTOS WHERE PEDIDO_COMPRA = @PEDIDO_COMPRA) 
+   BEGIN   DELETE		  FROM PEDIDOS_COMPRAS_PRODUTOS WHERE PEDIDO_COMPRA = @PEDIDO_COMPRA END
+ 
+ 
+--- Insere os dados na Tabela--------------------------------------------------------------------------
+--- ...
+ 
+INSERT INTO [NF_COMPRA] 
+		   ([NF_COMPRA]
+		   ,[FORMULARIO_ORIGEM]
+		   ,[TAB_MASTER_ORIGEM]
+		   ,[REG_MASTER_ORIGEM]
+		   ,[REG_LOG_INCLUSAO]
+		   ,[ROWVERSION]
+		   ,[EMPRESA]
+		   ,[ENTIDADE]
+		   ,[MOVIMENTO]
+		   ,[NF_ESPECIE]
+		   ,[NF_SERIE]
+		   ,[NF_NUMERO]
+		   ,[CHAVE_NFE]
+		   ,[PEDIDO_COMPRA]
+		   ,[RECEBIMENTO]
+		   ,[TOTAL_GERAL]
+		   ,[PROCESSAR]
+		   ,[STATUS_VALIDACAO_COMERCIAL])
+ 
+ 
+INSERT INTO [PEDIDOS_COMPRAS] 
+	       ([PEDIDO_COMPRA]
+	       ,[FORMULARIO_ORIGEM]
+	       ,[TAB_MASTER_ORIGEM]
+	       ,[REG_MASTER_ORIGEM]
+	       ,[REG_LOG_INCLUSAO]
+	       ,[ROWVERSION]
+	       ,[ENTIDADE]
+	       ,[EMPRESA]
+	       ,[DATA_HORA]
+	       ,[SUGESTAO_COMPRA]
+	       ,[CICLO_ELETRONICO])
+ 
+ 
+SET IDENTITY_INSERT PEDIDOS_COMPRAS_PRODUTOS ON
+ 
+INSERT INTO [PEDIDOS_COMPRAS_PRODUTOS] 
+	       ([PEDIDO_COMPRA_PRODUTO]
+		   ,[FORMULARIO_ORIGEM]
+		   ,[TAB_MASTER_ORIGEM]
+		   ,[REG_MASTER_ORIGEM]
+		   ,[REG_LOG_INCLUSAO]
+		   ,[ROWVERSION]
+		   ,[PEDIDO_COMPRA]
+		   ,[REFERENCIA]
+		   ,[PRODUTO]
+		   ,[QUANTIDADE]
+		   ,[QUANTIDADE_EMBALAGEM]
+		   ,[QUANTIDADE_ESTOQUE])
+ 
+ 
+SET IDENTITY_INSERT PEDIDOS_COMPRAS_PRODUTOS OFF
+
+--- Consulta final
+--- ...
+
+SELECT A.NF_COMPRA
+	  ,A.EMPRESA
+	  ,A.ENTIDADE					      AS FORNECEDOR
+	  ,CONVERT(VARCHAR, A.MOVIMENTO, 103) AS MOVIMENTO
+	  ,A.NF_SERIE
+	  ,A.NF_NUMERO
+	  ,B.PEDIDO_COMPRA
+	  ,C.PRODUTO
+	  ,D.DESCRICAO
+	  ,C.QUANTIDADE
+  FROM NF_COMPRA			    AS A
+  JOIN PEDIDOS_COMPRAS		    AS B ON A.PEDIDO_COMPRA = B.PEDIDO_COMPRA
+  JOIN PEDIDOS_COMPRAS_PRODUTOS AS C ON B.PEDIDO_COMPRA = C.PEDIDO_COMPRA
+  JOIN PRODUTOS				    AS D ON C.PRODUTO = D.PRODUTO
+ WHERE A.NF_COMPRA     = @NF_COMPRA
+   AND B.PEDIDO_COMPRA = @PEDIDO_COMPRA

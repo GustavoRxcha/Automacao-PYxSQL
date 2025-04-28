@@ -21,9 +21,9 @@ class Aplicacao(Tk):
         container.place(relx=0.5, rely=0.5, anchor='center')
         
         self.telas = {}
-        
-                                                                                        #<--loja|caixa-->
-        for T in (Homepage, MenuProblemas, DataHub, PrimaryCheio, AtualizarBiometria, IntegrarNota, Homepage_caixa, MenuProblemas_caixa, LimpezaCaixa, HabilitarCartaoPresente, AtualizarBiometriaCaixa):
+                                                                                               
+        for T in (Homepage, MenuProblemas, DataHub, PrimaryCheio, AtualizarBiometria, IntegrarNota,                                #<--LOJA
+                  Homepage_caixa, MenuProblemas_caixa, LimpezaCaixa, HabilitarCartaoPresente, AtualizarBiometriaCaixa):            #<--CAIXA
             tela = T(container, self)
             self.telas[T] = tela
             tela.grid(row=0, column=0, sticky="nsew")
@@ -110,6 +110,15 @@ class Homepage(Frame):
             self.entrada.config(fg='black')
 
 ########################LOJA-LOJA-LOJA-LOJA#################################################################
+########################LOJA-LOJA-LOJA-LOJA#################################################################
+########################LOJA-LOJA-LOJA-LOJA#################################################################
+########################LOJA-LOJA-LOJA-LOJA#################################################################
+########################LOJA-LOJA-LOJA-LOJA#################################################################
+########################LOJA-LOJA-LOJA-LOJA#################################################################
+########################LOJA-LOJA-LOJA-LOJA#################################################################
+########################LOJA-LOJA-LOJA-LOJA#################################################################
+########################LOJA-LOJA-LOJA-LOJA#################################################################
+########################LOJA-LOJA-LOJA-LOJA#################################################################
 
 class MenuProblemas(Frame):
     def __init__(self, parent, controller):
@@ -120,10 +129,11 @@ class MenuProblemas(Frame):
         self.texto_menu = Label(self, text="", font=("Arial", 15, "bold"), bg=amarelo_nissei, fg=azul_nissei)
         self.texto_menu.pack(pady=30)
 
-        Button(self, text="DATA HUB", width=15, height=2, command=lambda: self.controller.mostrar_tela(DataHub)).pack(pady=5)
-        Button(self, text="Primary Cheio", width=15, height=2, command=lambda: self.controller.mostrar_tela(PrimaryCheio)).pack(pady=5)
-        Button(self, text="Atualizar Matrícula", width=15, height=2, command=lambda: self.controller.mostrar_tela(AtualizarBiometria)).pack(pady=5)
-        Button(self, text="Alterar filial", width=15, height=2, bg=azul_nissei, fg="white", command=lambda: alterar_filial(self, Homepage)).pack(pady=5)
+        Button(self, text="Atualizar Matrícula", width=15, height=1, bg="#6c2e9e", fg="#ffffff", font=("Arial", 14), command=lambda: self.controller.mostrar_tela(AtualizarBiometria)).pack(pady=5)
+        Button(self, text="Integrar NF", width=15, height=1, bg="#6c2e9e", fg="#ffffff", font=("Arial", 14), command=lambda: self.controller.mostrar_tela(IntegrarNota)).pack(pady=5)
+        Button(self, text="DATA HUB", width=15, height=1, bg="#6c2e9e", fg="#ffffff", font=("Arial", 14), command=lambda: self.controller.mostrar_tela(DataHub)).pack(pady=5)
+        Button(self, text="Primary Cheio", width=15, height=1, bg="#6c2e9e", fg="#ffffff", font=("Arial", 14), command=lambda: self.controller.mostrar_tela(PrimaryCheio)).pack(pady=5)
+        Button(self, text="Alterar filial", width=15, height=1, bg=azul_nissei, fg="#ffffff", font=("Arial", 16), command=lambda: alterar_filial(self, Homepage)).pack(pady=5)
 
     def atualizar(self):
         filial = self.controller.filial
@@ -229,14 +239,45 @@ class IntegrarNota(Frame):
         Frame.__init__(self, parent, bg=amarelo_nissei)
         self.controller = controller
 
+        self.texto_integrar_titulo = Label(self, text="Informe a CHAVE NFE para integração", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
+        self.texto_integrar_titulo.pack(pady=30)
+    
+        self.chave_nfe = Entry(self, fg='grey', width=30, font=("Arial", 14))
+        self.chave_nfe.insert(0, 'Informe a chave...')
+        self.chave_nfe.bind('<FocusIn>', self.quando_clicar)
+        self.chave_nfe.pack(pady=20)
 
+        Button(self, text="Confirmar", width=15, height=1, bg='green', fg="#ffffff", command=self.integrar_nf, font=("Arial", 14)).pack(pady=5)
+        Button(self, text="Voltar para Menu", width=15, height=2, bg='#015b90', fg="#ffffff", command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_integrar_infos.config(text="", fg='black')]).pack(pady=5)
 
+        self.texto_integrar_infos = Label(self, text="", bg="#ffffff", fg=azul_nissei, font=("Arial", 13, "bold"), anchor="center", justify="center")
+        self.texto_integrar_infos.pack(pady=30, fill='x')
 
+    def integrar_nf(self):
+        chave_digitada = self.chave_nfe.get()
+        self.chave_nfe.delete(0, END)
 
+        if not chave_digitada.isdigit():
+            self.texto_integrar_infos.config(text="CHAVE inválida! Use apenas números.", fg="red")
+            return
+        else:
+            integracao_nota = integrar_nota(self.controller.conn, chave_digitada)
+            self.texto_integrar_infos.config(text=integracao_nota, fg=azul_nissei)
 
+    def quando_clicar(self, event):
+        if self.chave_nfe.get() == 'Informe a chave...':
+            self.chave_nfe.delete(0, END)
+            self.chave_nfe.config(fg='black')
 
-
-
+#########################CAIXA-CAIXA-CAIXA################################################################
+#########################CAIXA-CAIXA-CAIXA################################################################
+#########################CAIXA-CAIXA-CAIXA################################################################
+#########################CAIXA-CAIXA-CAIXA################################################################
+#########################CAIXA-CAIXA-CAIXA################################################################
+#########################CAIXA-CAIXA-CAIXA################################################################
+#########################CAIXA-CAIXA-CAIXA################################################################
+#########################CAIXA-CAIXA-CAIXA################################################################
+#########################CAIXA-CAIXA-CAIXA################################################################
 #########################CAIXA-CAIXA-CAIXA################################################################
 
 class Homepage_caixa(Frame):
@@ -298,15 +339,14 @@ class MenuProblemas_caixa(Frame):
         Frame.__init__(self, parent, bg=amarelo_nissei)
         self.controller = controller
         
-        # Widget estático
         self.texto_menu = Label(self, text="", font=("Arial", 15, "bold"), bg=amarelo_nissei, fg=azul_nissei)
         self.texto_menu.pack(pady=30)
 
-        Button(self, text="Atualizar Biometrias", width=15, height=2, command=lambda: self.controller.mostrar_tela(AtualizarBiometriaCaixa)).pack(pady=5)
-        Button(self, text="Habilitar\ncartão presente", width=15, height=2, command=lambda: self.controller.mostrar_tela(HabilitarCartaoPresente)).pack(pady=5)
-        Button(self, text="Limpeza de LOG", width=15, height=2, command=lambda: self.controller.mostrar_tela(LimpezaCaixa)).pack(pady=5)
-        Button(self, text="Alterar caixa", width=15, height=2, bg=azul_nissei, fg="white", command=lambda: self.controller.mostrar_tela(Homepage_caixa)).pack(pady=5)
-        Button(self, text="Alterar filial", width=15, height=2, bg=azul_nissei, fg="white", command=lambda: self.controller.mostrar_tela(Homepage)).pack(pady=5)
+        Button(self, text="Atualizar Biometrias", width=15, height=2, bg="#6c2e9e", fg="#ffffff", font=("Arial", 14), command=lambda: self.controller.mostrar_tela(AtualizarBiometriaCaixa)).pack(pady=5)
+        Button(self, text="Habilitar\ncartão presente", width=15, height=2, bg="#6c2e9e", fg="#ffffff", font=("Arial", 14), command=lambda: self.controller.mostrar_tela(HabilitarCartaoPresente)).pack(pady=5)
+        Button(self, text="Limpeza de LOG", width=15, height=2, bg="#6c2e9e", fg="#ffffff", font=("Arial", 14), command=lambda: self.controller.mostrar_tela(LimpezaCaixa)).pack(pady=5)
+        Button(self, text="Alterar caixa", width=15, height=1, bg=azul_nissei, fg="#ffffff", font=("Arial", 16), command=lambda: self.controller.mostrar_tela(Homepage_caixa)).pack(pady=5)
+        Button(self, text="Alterar filial", width=15, height=1, bg=azul_nissei, fg="#ffffff", font=("Arial", 16), command=lambda: self.controller.mostrar_tela(Homepage)).pack(pady=5)
 
     def atualizar(self):
         filial = self.controller.filial
@@ -389,6 +429,12 @@ class AtualizarBiometriaCaixa(Frame):
 
 #########################################################################################
 
+class AtualizarVersao(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg=amarelo_nissei)
+        self.controller = controller
+
+#########################################################################################
 
 app = Aplicacao()
 app.mainloop()
