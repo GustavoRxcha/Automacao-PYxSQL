@@ -1,5 +1,6 @@
 import pyodbc
 from pathlib import *
+import subprocess
 
 def gerar_ip(filial):
 
