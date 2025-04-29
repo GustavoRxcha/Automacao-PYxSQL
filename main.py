@@ -1,5 +1,6 @@
 import pyodbc
 from tkinter import *
+import subprocess
 from PIL import Image, ImageTk
 from funcoesloja import *
 from funcoescaixa import *
@@ -27,7 +28,7 @@ class Aplicacao(Tk):
         
         self.telas = {}
                                                                                                
-        for T in (Homepage, MenuProblemas, DataHub, AtualizarEstoque, AtualizarBiometria, IntegrarNota, AtualizarVersaoLoja,            #<--LOJA
+        for T in (Homepage, MenuProblemas, DataHub, AtualizarEstoque, AtualizarBiometria, IntegrarNota, AtualizarVersaoLoja, LimparTemp,           #<--LOJA
                   HomepageCaixa, MenuProblemasCaixa, HabilitarCartaoPresente, AtualizarBiometriaCaixa, AtualizarVersaoCaixa, TabelaZeroCaixa):                               #<--CAIXA
             tela = T(container, self)
             self.telas[T] = tela
@@ -148,7 +149,7 @@ class MenuProblemas(Frame):
             ("DATA HUB", lambda: self.controller.mostrar_tela(DataHub)),
             ("Atualizar Estoque", lambda: self.controller.mostrar_tela(AtualizarEstoque)),
             ("Atualizar Versão\nPREVENDA", lambda: self.controller.mostrar_tela(AtualizarVersaoLoja)),
-            ("----------", lambda: self.controller.mostrar_tela(MenuProblemas)),
+            ("Limpar %TEMP%", lambda: self.controller.mostrar_tela(LimparTemp)),
         ]
 
         for i, (texto, comando) in enumerate(botoes):
@@ -367,6 +368,45 @@ class AtualizarVersaoLoja(Frame):
         if self.inserir_versao.get() == 'Informe a versão...':
             self.inserir_versao.delete(0, END)
             self.inserir_versao.config(fg='black')
+
+#########################################################################################
+
+class LimparTemp(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg=amarelo_nissei)
+        self.controller = controller
+    
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
+
+        self.texto_informar_ip = Label(self, text="Informe o IP do terminal", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
+        self.texto_informar_ip.pack(pady=30)
+    
+        self.entry_ip = Entry(self, fg='grey', width=30, font=("Arial", 14))
+        self.entry_ip.insert(0, 'Informe o IP...')
+        self.entry_ip.bind('<FocusIn>', self.quando_clicar)
+        self.entry_ip.pack(pady=20)
+
+        Button(self, text="Limpar %Temp%", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.limpar_temp).pack(pady=5)
+        Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="#ffffff", font=("Arial", 16), command=lambda: self.controller.mostrar_tela(MenuProblemas)).pack(pady=5)
+
+        self.texto_limpeza_status = Label(self, text="", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 13, "bold"), anchor="center", justify="center")
+        self.texto_limpeza_status.pack(pady=30, fill='x')
+
+    def limpar_temp(self):
+        ip_digitado = self.entry_ip.get()
+        self.entry_ip.delete(0, END)
+
+        try:
+            status_limpeza = limpar_temp_ps1(self.controller.conn, ip_digitado)
+            self.texto_limpeza_status.config(text=status_limpeza, fg=azul_nissei)
+        except:
+            self.texto_limpeza_status.config(text="ERRO na execução do PowerShell\nIP incorreto.", fg="red")
+
+
+    def quando_clicar(self, event):
+        if self.entry_ip.get() == 'Informe o IP...':
+            self.entry_ip.delete(0, END)
+            self.entry_ip.config(fg='black')
 
 #########################CAIXA-CAIXA-CAIXA################################################################
 #########################CAIXA-CAIXA-CAIXA################################################################

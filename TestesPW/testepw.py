@@ -1,9 +1,13 @@
 import subprocess
 
-def executar_script_powershell(ip_maquina_remota, usuario, senha, caminho_script_powershell):
+def executar_script_powershell(ip_maquina_remota):
     # Caminho do PsExec
     psexec_path = r"C:\caminho\para\PSTools\PsExec.exe"
     
+    usuario = "Administrador"
+    senha = "senha_remota"
+    caminho_script = r"testescript.ps1"
+
     comando = [
         psexec_path,
         f"\\\\{ip_maquina_remota}",
@@ -11,7 +15,7 @@ def executar_script_powershell(ip_maquina_remota, usuario, senha, caminho_script
         "-p", senha,
         "powershell.exe", 
         "-ExecutionPolicy", "Bypass",  # Ignorar a política de execução
-        "-File", caminho_script_powershell 
+        "-File", caminho_script 
     ]
     
     try:
@@ -30,8 +34,5 @@ def executar_script_powershell(ip_maquina_remota, usuario, senha, caminho_script
 
 
 ip = "10.16.44.24"
-usuario = "Administrador"
-senha = "senha_remota"
-caminho_script = r"testescript.ps1"
 
-executar_script_powershell(ip, usuario, senha, caminho_script)
+executar_script_powershell(ip)
