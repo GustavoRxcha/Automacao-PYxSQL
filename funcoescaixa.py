@@ -1,15 +1,17 @@
 import pyodbc
+from pathlib import *
 
-def limpeza_log_caixa(conn):
+# def limpeza_log_caixa(conn):
 
-    cursor = conn.cursor()
-    select_nfg_log = cursor.execute("SELECT ENVIADO FROM ERPM_UPLOAD WITH (NOLOCK) WHERE ENVIADO = 'S'").fetchone() #SELECT * FROM NFCE_LOG WITH WHERE MOVIMENTO <= '01-01-2025'
-    if select_nfg_log:
-        #curso.execute com DELETE NFCE_LOG FROM NFCE_LOG WITH (NOLOCK) WHERE MOVIMENTO <= '01-01-2025' 
-        return "Feita a limpeza de Log's"
-    else:
-            return "Não há arquivos para limpar."
-    cursor.close()
+#     cursor = conn.cursor()
+#     select_nfg_log = cursor.execute("SELECT * FROM NFCE_LOG WITH WHERE MOVIMENTO <= '01-01-2025'").fetchone()
+
+#     if select_nfg_log:
+#         cursor.execute("DELETE NFCE_LOG FROM NFCE_LOG WITH (NOLOCK) WHERE MOVIMENTO <= '01-01-2025'") 
+#         return "Feita a limpeza de Log's"
+#     else:
+#             return "Não há arquivos para limpar."
+#     cursor.close()
 
 # --------------------------------------------------------------------------------
 
@@ -40,6 +42,33 @@ def atualizar_biometria_caixa(conn):
         return f"Feito atualização de Biometrias no caixa selecionado!\nTRUNCATE - Ctrl + T"
     except:
         return f"!ERRO: Não foi possível atualizar Biometrias!\n Acessar Banco e verificar."
+
+    cursor.close()
+
+# --------------------------------------------------------------------------------
+
+def tabela_zero_caixa(conn):
+     
+    dir_atual = Path(__file__).parent  
+    caminho_tabela_zero_1 = dir_atual / "ScriptsSQL" / "tabela_zero_1.sql"
+    with open(caminho_tabela_zero_1, 'r', encoding='utf-8') as file:
+        tabela_zero_1 = file.read()
+
+    dir_atual = Path(__file__).parent  
+    caminho_tabela_zero_2 = dir_atual / "ScriptsSQL" / "tabela_zero_2.sql"
+    with open(caminho_tabela_zero_2, 'r', encoding='utf-8') as file:
+        tabela_zero_2 = file.read()
+
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("exec USP_SINCRONIZA_TABELAS_PDV")
+        return f"Erro de Tabela 0 corrigido utilizando a USP"
+    except:
+        cursor.execute(tabela_zero_1)
+        cursor.execute(tabela_zero_2)
+        cursor.execute("exec USP_SINCRONIZA_TABELAS_PDV_LOJA")
+        return f"feito a criação da USP e correção de Tabela 0"
 
     cursor.close()
 

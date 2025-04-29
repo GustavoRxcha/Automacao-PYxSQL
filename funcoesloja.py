@@ -96,19 +96,19 @@ def habilitar_datahub(conn):
 
 # --------------------------------------------------------------------------------
 
-def primary_cheio(conn):
+# def primary_cheio(conn):
 
-        cursor = conn.cursor()
+#         cursor = conn.cursor()
 
-        select_erpm_upload = cursor.execute("SELECT ENVIADO FROM ERPM_UPLOAD WITH WHERE ENVIADO = 'S'").fetchone()
-        if select_erpm_upload:
-            cursor.execute("DELETE ERPM_UPLOAD FROM ERPM_UPLOAD WITH WHERE ENVIADO = 'S'") 
-            conn.commit()
-            return "Feita a limpeza de Log's\n\nCorreção de Primary cheio!"
-        else:
-                return "Não há arquivos para limpar."
+#         select_erpm_upload = cursor.execute("SELECT ENVIADO FROM ERPM_UPLOAD WITH WHERE ENVIADO = 'S'").fetchone()
+#         if select_erpm_upload:
+#             cursor.execute("DELETE ERPM_UPLOAD FROM ERPM_UPLOAD WITH WHERE ENVIADO = 'S'") 
+#             conn.commit()
+#             return "Feita a limpeza de Log's\n\nCorreção de Primary cheio!"
+#         else:
+#                 return "Não há arquivos para limpar."
 
-        cursor.close()
+#         cursor.close()
 
 # --------------------------------------------------------------------------------
 
@@ -183,10 +183,43 @@ def integrar_nota(conn, NF):
 
     cursor.close()    
 #--------------------------------------------------------------------------------
-
-def atualizar_versao(conn):
+def consultar_versao(conn):
 
     cursor = conn.cursor()
     
+    status_versao = cursor.execute("SELECT VERSAO FROM PARAMETROS").fetchone()
+    if status_versao:
+        resultado_select = status_versao[0]
+        return resultado_select
+
     cursor.close()
+
+def atualizar_versao(conn, versao):
+
+    cursor = conn.cursor()
+    
+    cursor.execute("UPDATE PARAMETROS SET VERSAO = ?", (versao,))
+
+    cursor.close()
+#--------------------------------------------------------------------------------
+
+def atualizar_estoque(conn):
+
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("update ERPM_UPLOAD set ENVIADO = 'P' where ENVIADO = 'N'")
+        cursor.execute("EXEC USP_SINCRONIZACAO_ESTOQUE_LOJA  ")
+        cursor.execute("UPDATE ERPM_UPLOAD SET ENVIADO = 'N' WHERE ENVIADO = 'P'")
+        
+        return f"Estoque da filial atualizado com sucesso!."
+    except:
+        return f"!ERRO: Não foi possível atualizar o estoque!\n Acessar Banco e verificar."
+    
+    cursor.close()
+
+#--------------------------------------------------------------------------------
+
+
+
 #--------------------------------------------------------------------------------
