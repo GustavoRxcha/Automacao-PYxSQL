@@ -54,7 +54,7 @@ class Homepage(Frame):
     
     def criar_widgets(self):
         
-        Label(self, image=self.controller.logo_tk).pack()
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
 
         topo_frame = Frame(self, bg=amarelo_nissei)
         topo_frame.pack(pady=20)
@@ -174,11 +174,13 @@ class DataHub(Frame):
         Frame.__init__(self, parent, bg=amarelo_nissei)
         self.controller = controller
 
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
+
         self.texto_status = Label(self, text="STATUS DO DATAHUB:", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
         self.texto_status.pack(pady=30)
 
-        Button(self, text="Habilitar DataHub", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.habilitar_db).pack(pady=5)
-        Button(self, text="Desabilitar DataHub", width=15, height=1, bg="red", fg="#ffffff", font=("Arial", 14), command=self.desabilitar_db).pack(pady=5)
+        Button(self, text="Habilitar DataHub", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.habilitar_db).pack(pady=10)
+        Button(self, text="Desabilitar DataHub", width=15, height=1, bg="red", fg="#ffffff", font=("Arial", 14), command=self.desabilitar_db).pack(pady=10)
         Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="white", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_status.config(text="STATUS DO DATAHUB:")]).pack(pady=5)
 
     def habilitar_db(self):
@@ -233,7 +235,9 @@ class AtualizarBiometria(Frame):
         Frame.__init__(self, parent, bg=amarelo_nissei)
         self.controller = controller
     
-        self.texto_matricula_titulo = Label(self, text="Informe a matrícula", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
+
+        self.texto_matricula_titulo = Label(self, text="Informe a matrícula", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
         self.texto_matricula_titulo.pack(pady=30)
     
         self.matricula = Entry(self, fg='grey', width=30, font=("Arial", 14))
@@ -241,8 +245,8 @@ class AtualizarBiometria(Frame):
         self.matricula.bind('<FocusIn>', self.quando_clicar)
         self.matricula.pack(pady=20)
 
-        Button(self, text="Confirmar", width=15, height=1, bg='green', fg="#ffffff", command=self.atualizar_bio, font=("Arial", 14)).pack(pady=5)
-        Button(self, text="Voltar para Menu", width=15, height=2, bg="#ee3642", fg="#ffffff", command=lambda: self.controller.mostrar_tela(MenuProblemas)).pack(pady=5)
+        Button(self, text="Confirmar", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.atualizar_bio).pack(pady=5)
+        Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="#ffffff", font=("Arial", 16), command=lambda: self.controller.mostrar_tela(MenuProblemas)).pack(pady=5)
 
         self.texto_matricula_infos = Label(self, text="", bg="#ffffff", fg=azul_nissei, font=("Arial", 13, "bold"), anchor="center", justify="center")
         self.texto_matricula_infos.pack(pady=30, fill='x')
@@ -270,6 +274,8 @@ class IntegrarNota(Frame):
         Frame.__init__(self, parent, bg=amarelo_nissei)
         self.controller = controller
 
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
+
         self.texto_integrar_titulo = Label(self, text="Informe a CHAVE NFE para integração", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
         self.texto_integrar_titulo.pack(pady=30)
     
@@ -278,8 +284,8 @@ class IntegrarNota(Frame):
         self.chave_nfe.bind('<FocusIn>', self.quando_clicar)
         self.chave_nfe.pack(pady=20)
 
-        Button(self, text="Confirmar", width=15, height=1, bg='green', fg="#ffffff", command=self.integrar_nf, font=("Arial", 14)).pack(pady=5)
-        Button(self, text="Voltar para Menu", width=15, height=2, bg="#ee3642", fg="#ffffff", command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_integrar_infos.config(text="", fg='black')]).pack(pady=5)
+        Button(self, text="Confirmar", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.integrar_nf).pack(pady=5)
+        Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="#ffffff", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_integrar_infos.config(text="", fg='black')]).pack(pady=5)
 
         self.texto_integrar_infos = Label(self, text="", bg="#ffffff", fg=azul_nissei, font=("Arial", 13, "bold"), anchor="center", justify="center")
         self.texto_integrar_infos.pack(pady=30, fill='x')
@@ -307,7 +313,9 @@ class AtualizarEstoque(Frame):
         Frame.__init__(self, parent, bg=amarelo_nissei)
         self.controller = controller
 
-        self.texto_titulo_estoque = Label(self, text="Atualizar estoque da Filial", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
+
+        self.texto_titulo_estoque = Label(self, text="Atualizar estoque da Filial", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
         self.texto_titulo_estoque.pack(pady=30)
         self.texto_resultado_estoque = Label(self, text="", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
         self.texto_resultado_estoque.pack(pady=30)
@@ -326,6 +334,8 @@ class AtualizarVersaoLoja(Frame):
         Frame.__init__(self, parent, bg=amarelo_nissei)
         self.controller = controller
 
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
+
         self.texto_versao = Label(self, text="Versão atual PREVENDA:", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
         self.texto_versao.pack(pady=30)
 
@@ -334,7 +344,7 @@ class AtualizarVersaoLoja(Frame):
         self.inserir_versao = Entry(self, fg='grey', width=30, font=("Arial", 15))
         self.inserir_versao.insert(0, 'Informe a versão...')
         self.inserir_versao.bind('<FocusIn>', self.quando_clicar)
-        self.inserir_versao.pack(pady=(80, 20))
+        self.inserir_versao.pack(pady=(50, 20))
 
         Button(self, text="Atualizar Versão", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.atualiza_versao).pack(pady=5)
         Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="white", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_versao.config(text="Versão atual:")]).pack(pady=5)
@@ -374,7 +384,7 @@ class HomepageCaixa(Frame):
         Frame.__init__(self, parent, bg=amarelo_nissei)
         self.controller = controller
 
-        Label(self, image=self.controller.logo_tk).pack()
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
 
         self.texto_selecionar_caixa = Label(self, text="Qual CAIXA será feita a conexão?", fg=azul_nissei, bg=amarelo_nissei, font=("Arial", 20, "bold"))
         self.texto_selecionar_caixa.pack(pady=30, padx=40)
@@ -505,6 +515,8 @@ class HabilitarCartaoPresente(Frame):
         Frame.__init__(self, parent, bg=amarelo_nissei)
         self.controller = controller
 
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
+
         self.texto_titulo_habilitar = Label(self, text="HABILITAR CARTÃO PRESENTE", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
         self.texto_titulo_habilitar.pack(pady=30)
         self.texto_status_cartao = Label(self, text="", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
@@ -523,6 +535,8 @@ class AtualizarBiometriaCaixa(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg=amarelo_nissei)
         self.controller = controller
+
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
 
         self.texto_titulo_bio_caixa = Label(self, text="Atualização de Biometrias no CAIXA", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
         self.texto_titulo_bio_caixa.pack(pady=5)
@@ -545,6 +559,8 @@ class AtualizarVersaoCaixa(Frame):
         Frame.__init__(self, parent, bg=amarelo_nissei)
         self.controller = controller
 
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
+
         self.texto_versao = Label(self, text="Versão atual PDV:", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
         self.texto_versao.pack(pady=30)
 
@@ -553,7 +569,7 @@ class AtualizarVersaoCaixa(Frame):
         self.inserir_versao = Entry(self, fg='grey', width=30, font=("Arial", 15))
         self.inserir_versao.insert(0, 'Informe a versão...')
         self.inserir_versao.bind('<FocusIn>', self.quando_clicar)
-        self.inserir_versao.pack(pady=(80, 20))
+        self.inserir_versao.pack(pady=(50, 20))
 
         Button(self, text="Atualizar Versão", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.atualiza_versao).pack(pady=5)
         Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="white", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_versao.config(text="Versão atual:")]).pack(pady=5)
@@ -583,6 +599,8 @@ class TabelaZeroCaixa(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg=amarelo_nissei)
         self.controller = controller
+
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
 
         self.texto_titulo_tabelazero = Label(self, text="Corrigir PDV com TABELA 0", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
         self.texto_titulo_tabelazero.pack(pady=30)
