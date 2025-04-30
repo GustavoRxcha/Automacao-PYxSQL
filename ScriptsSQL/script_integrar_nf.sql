@@ -5,21 +5,6 @@ USE [PBS_LOCAL_DADOS]
  
 DECLARE @NF_COMPRA     VARCHAR(15) = ?
 	   ,@PEDIDO_COMPRA VARCHAR(15) = ?
-	   
- 
- 
---- Consulta na consistência e no tempo do Pedido
---- ...
- 
-EXEC ('IF NOT EXISTS (SELECT TOP 1 1 
-					    FROM NF_COMPRA AS A JOIN PEDIDOS_COMPRAS AS B ON A.PEDIDO_COMPRA = B.PEDIDO_COMPRA
-					   WHERE A.NF_COMPRA     = ''' + @NF_COMPRA + ''' AND B.PEDIDO_COMPRA = ''' + @PEDIDO_COMPRA + ''')
-					  RAISERROR(''Não foi possível encontrar uma relação de dados entre as tabelas NF_COMPRA e PEDIDOS_COMPRAS no sistema central. Por favor, consulte os formulários correspondentes para obter um melhor entendimento ou revise as informações fornecidas nas variáveis locais.'', 15, 1)') AT [RETAGUARDA]
- 
-EXEC ('IF (SELECT CONVERT(DATE, DATA_HORA) FROM PEDIDOS_COMPRAS WHERE PEDIDO_COMPRA = ''' + @PEDIDO_COMPRA + ''') >= CAST(GETDATE() -60 AS DATE) OR
-	      (SELECT MOVIMENTO FROM NF_COMPRA WHERE NF_COMPRA = ''' + @NF_COMPRA + ''') >= CAST(GETDATE() -60 AS DATE)
-	   RAISERROR(''O pedido de compra não possui um período de movimentação menor que 60 dias, o insert não faz sentido. Por favor, contate um analista responsável.'', 15, 1)
-	   RETURN;') AT [RETAGUARDA]
  
  
 ---  Exclui os dados no banco local ---------------------------------------------------------------------

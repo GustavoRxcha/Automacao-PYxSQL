@@ -28,8 +28,9 @@ class Aplicacao(Tk):
         
         self.telas = {}
                                                                                                
-        for T in (Homepage, MenuProblemas, DataHub, AtualizarEstoque, AtualizarBiometria, IntegrarNota, AtualizarVersaoLoja, LimparTemp,           #<--LOJA
-                  HomepageCaixa, MenuProblemasCaixa, HabilitarCartaoPresente, AtualizarBiometriaCaixa, AtualizarVersaoCaixa, TabelaZeroCaixa):                               #<--CAIXA
+        for T in (Homepage, MenuProblemas, DataHub, AtualizarEstoque, AtualizarBiometria, IntegrarNota, AtualizarVersaoLoja, LimparTemp,                                    #<--LOJA
+                  HomepageCaixa, MenuProblemasCaixa, HabilitarCartaoPresente, AtualizarBiometriaCaixa, AtualizarVersaoCaixa, TabelaZeroCaixa,                               #<--CAIXA
+                  ConsultarVendaCaixa, HabilitarVNCCaixa):                                                                                                                  #<--CAIXA
             tela = T(container, self)
             self.telas[T] = tela
             tela.grid(row=0, column=0, sticky="nsew")
@@ -96,6 +97,7 @@ class Homepage(Frame):
                 'Trusted_Connection=yes;' #APAGAR
                 # f'UID=sa;'
                 # f'PWD=ERPM@2017;'
+                'Connection Timeout=3;'
             )
             print("Conectado com sucesso ao banco!")
             self.controller.mostrar_tela(MenuProblemas)
@@ -145,9 +147,9 @@ class MenuProblemas(Frame):
 
         botoes = [
             ("Atualizar Matrícula", lambda: self.controller.mostrar_tela(AtualizarBiometria)),
+            ("Atualizar Estoque", lambda: self.controller.mostrar_tela(AtualizarEstoque)),
             ("Integrar NF", lambda: self.controller.mostrar_tela(IntegrarNota)),
             ("DATA HUB", lambda: self.controller.mostrar_tela(DataHub)),
-            ("Atualizar Estoque", lambda: self.controller.mostrar_tela(AtualizarEstoque)),
             ("Atualizar Versão\nPREVENDA", lambda: self.controller.mostrar_tela(AtualizarVersaoLoja)),
             ("Limpar %TEMP%", lambda: self.controller.mostrar_tela(LimparTemp)),
         ]
@@ -279,6 +281,9 @@ class IntegrarNota(Frame):
 
         self.texto_integrar_titulo = Label(self, text="Informe a CHAVE NFE para integração", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
         self.texto_integrar_titulo.pack(pady=30)
+
+        self.aviso = Label(self, text="EM TESTES", bg=amarelo_nissei, fg="red", font=("Arial", 20, "bold"))
+        self.aviso.pack(pady=1)
     
         self.chave_nfe = Entry(self, fg='grey', width=30, font=("Arial", 14))
         self.chave_nfe.insert(0, 'Informe a chave...')
@@ -340,17 +345,16 @@ class AtualizarVersaoLoja(Frame):
         self.texto_versao = Label(self, text="Versão atual PREVENDA:", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
         self.texto_versao.pack(pady=30)
 
-        Button(self, text="Consultar Versão", width=15, height=1, bg=azul_nissei, fg="#ffffff", font=("Arial", 14), command=self.consulta_de_versao).pack(pady=5)
-
-        self.inserir_versao = Entry(self, fg='grey', width=30, font=("Arial", 15))
+        self.inserir_versao = Entry(self, fg='grey', width=30, font=("Arial", 16))
         self.inserir_versao.insert(0, 'Informe a versão...')
         self.inserir_versao.bind('<FocusIn>', self.quando_clicar)
-        self.inserir_versao.pack(pady=(50, 20))
+        self.inserir_versao.pack(pady=(40, 20))
 
         Button(self, text="Atualizar Versão", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.atualiza_versao).pack(pady=5)
+        Button(self, text="Consultar Versão", width=15, height=1, bg=azul_nissei, fg="#ffffff", font=("Arial", 14), command=self.consulta_de_versao).pack(pady=5)
         Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="white", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_versao.config(text="Versão atual:")]).pack(pady=5)
 
-        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: -------           \nPREVENDA: -------", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
+        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: -----------             \nPREVENDA: 1.102.081", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
         self.info_versao.pack(pady=30)
 
     def consulta_de_versao(self):
@@ -380,13 +384,16 @@ class LimparTemp(Frame):
 
         self.texto_informar_ip = Label(self, text="Informe o IP do terminal", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
         self.texto_informar_ip.pack(pady=30)
+
+        self.aviso = Label(self, text="EM CONSTRUÇÃO", bg=amarelo_nissei, fg="red", font=("Arial", 20, "bold"))
+        self.aviso.pack(pady=30)
     
         self.entry_ip = Entry(self, fg='grey', width=30, font=("Arial", 14))
         self.entry_ip.insert(0, 'Informe o IP...')
         self.entry_ip.bind('<FocusIn>', self.quando_clicar)
         self.entry_ip.pack(pady=20)
 
-        Button(self, text="Limpar %Temp%", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.limpar_temp).pack(pady=5)
+        #Button(self, text="Limpar %Temp%", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.limpar_temp).pack(pady=5)
         Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="#ffffff", font=("Arial", 16), command=lambda: self.controller.mostrar_tela(MenuProblemas)).pack(pady=5)
 
         self.texto_limpeza_status = Label(self, text="", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 13, "bold"), anchor="center", justify="center")
@@ -447,26 +454,30 @@ class HomepageCaixa(Frame):
         if caixa_selecionado.strip() == "" or caixa_selecionado == "Digite aqui..." or caixa_selecionado == '0':
             return
         
-        ip_caixa = self.controller.ip + caixa_selecionado
-        print(ip_caixa)
+        self.controller.ip_caixa = self.controller.ip + caixa_selecionado
+        print(self.controller.ip_caixa)
 
-        ip_caixa = r'localhost\SQLEXPRESS' #APAGAR
+        self.controller.ip_caixa = r'localhost\SQLEXPRESS' #APAGAR
 
-        if len(caixa_selecionado) < 2 or caixa_selecionado == None:
-            self.controller.conn = pyodbc.connect(
-                f'DRIVER={{ODBC Driver 17 for SQL Server}};'
-                f'SERVER={ip_caixa};'
-                f'DATABASE=LOJA;'
-                'Trusted_Connection=yes;' #APAGAR
-                # f'UID=sa;'
-                # f'PWD=ERPM@2017;'
-            )
-            print("Conectado com sucesso ao banco!")
-            self.controller.mostrar_tela(MenuProblemasCaixa)
-            self.texto_erro_selecionar_caixa.config(text="")
-        else:
-            self.texto_erro_selecionar_caixa.config(text="Número de CAIXA inválido!")
-            return
+        try:
+            if len(caixa_selecionado) < 2 or caixa_selecionado == None:
+                self.controller.conn = pyodbc.connect(
+                    f'DRIVER={{ODBC Driver 17 for SQL Server}};'
+                    f'SERVER={self.controller.ip_caixa};'
+                    f'DATABASE=LOJA;'
+                    'Trusted_Connection=yes;' #APAGAR
+                    # f'UID=sa;'
+                    # f'PWD=ERPM@2017;'
+                    'Connection Timeout=3;'
+                )
+                print("Conectado com sucesso ao banco!")
+                self.controller.mostrar_tela(MenuProblemasCaixa)
+                self.texto_erro_selecionar_caixa.config(text="")
+            else:
+                self.texto_erro_selecionar_caixa.config(text="Número de CAIXA inválido!")
+                return
+        except:
+            self.texto_erro_selecionar_caixa.config(text="Falha na conexão com o banco.")
     
     def quando_clicar(self, event):
         if self.entrada.get() == 'Digite aqui...':
@@ -493,6 +504,8 @@ class MenuProblemasCaixa(Frame):
             ("Tabela 0", lambda: self.controller.mostrar_tela(TabelaZeroCaixa), azul_nissei),
             ("Habilitar\ncartão presente", lambda: self.controller.mostrar_tela(HabilitarCartaoPresente), azul_nissei),
             ("Atualizar Versão\nPDV", lambda: self.controller.mostrar_tela(AtualizarVersaoCaixa), azul_nissei),
+            ("Verificar Vendas", lambda: self.controller.mostrar_tela(ConsultarVendaCaixa), azul_nissei),
+            ("Habilitar VNC", lambda: self.controller.mostrar_tela(HabilitarVNCCaixa), azul_nissei),
             ("Alterar caixa", lambda: self.controller.mostrar_tela(HomepageCaixa), "#ee3642"),
             ("Alterar filial", lambda: self.controller.mostrar_tela(Homepage), "#ee3642"),
         ]
@@ -604,17 +617,16 @@ class AtualizarVersaoCaixa(Frame):
         self.texto_versao = Label(self, text="Versão atual PDV:", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
         self.texto_versao.pack(pady=30)
 
-        Button(self, text="Consultar Versão", width=15, height=1, bg=azul_nissei, fg="#ffffff", font=("Arial", 14), command=self.consulta_de_versao).pack(pady=5)
-
-        self.inserir_versao = Entry(self, fg='grey', width=30, font=("Arial", 15))
+        self.inserir_versao = Entry(self, fg='grey', width=30, font=("Arial", 16))
         self.inserir_versao.insert(0, 'Informe a versão...')
         self.inserir_versao.bind('<FocusIn>', self.quando_clicar)
-        self.inserir_versao.pack(pady=(50, 20))
+        self.inserir_versao.pack(pady=(40, 20))
 
         Button(self, text="Atualizar Versão", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.atualiza_versao).pack(pady=5)
+        Button(self, text="Consultar Versão", width=15, height=1, bg=azul_nissei, fg="#ffffff", font=("Arial", 14), command=self.consulta_de_versao).pack(pady=5)
         Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="white", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_versao.config(text="Versão atual:")]).pack(pady=5)
 
-        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: -------           \nPREVENDA: -------", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
+        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: -----------             \nPREVENDA: 1.102.081", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
         self.info_versao.pack(pady=30)
 
     def consulta_de_versao(self):
@@ -653,6 +665,87 @@ class TabelaZeroCaixa(Frame):
     def corrigir_tabela_zero(self):
         resultado_tabela = tabela_zero_caixa(self.controller.conn)
         self.texto_status_tabelazero.config(text=resultado_tabela)
+
+#########################################################################################
+
+class ConsultarVendaCaixa(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg=amarelo_nissei)
+        self.controller = controller
+
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
+
+        self.titulo_consulta = Label(self, text="Consulta de vendas no Caixa", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
+        self.titulo_consulta.pack(pady=(30,15))
+
+        self.titulo_consulta = Label(self, text="Utilize a parametrização DD/MM/AAAA e 99,99", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold", "underline"))
+        self.titulo_consulta.pack(pady=10)
+
+        self.inserir_data = Entry(self, fg='grey', width=30, font=("Arial", 15))
+        self.inserir_data.insert(0, 'Informe a data, Ex: DD/MM/AAAA')
+        self.inserir_data.bind('<FocusIn>', self.quando_clicar)
+        self.inserir_data.pack(pady=10)
+
+        self.titulo_consulta = Label(self, text="&", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
+        self.titulo_consulta.pack(pady=1)
+
+        self.inserir_valor = Entry(self, fg='grey', width=30, font=("Arial", 15))
+        self.inserir_valor.insert(0, 'Informe o Valor, Ex: 99,99')
+        self.inserir_valor.bind('<FocusIn>', self.quando_clicar)
+        self.inserir_valor.pack(pady=10)
+
+        Button(self, text="Consultar Venda", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.consultar_vendas).pack(pady=5)
+        Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="white", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.historico_vendas.config(text="", fg="black")]).pack(pady=5)
+
+        self.historico_vendas = Label(self, text="", bg="#ffffff", fg=azul_nissei, font=("Arial", 13, "bold"), anchor="center", justify="center")
+        self.historico_vendas.pack(pady=30, fill='x')
+
+    def consultar_vendas(self):
+        data_digitada = self.inserir_data.get()
+        self.inserir_data.delete(0, END)
+
+        valor_digitado = self.inserir_valor.get()
+        self.inserir_valor.delete(0, END)
+
+        if data_digitada and valor_digitado:
+            vendas_efetuadas = atualizar_versao(self.controller.conn, data_digitada, valor_digitado)
+            self.historico_vendas.config(text=vendas_efetuadas, fg=azul_nissei)
+        else:
+            self.historico_vendas.config(text="Preencha os campos corretamente.", fg="red")
+
+    def quando_clicar(self, event):
+        if self.inserir_data.get() == 'Informe a data, Ex: DD/MM/AAAA':
+            self.inserir_data.delete(0, END)
+            self.inserir_data.config(fg='black')
+
+        if self.inserir_valor.get() == 'Informe o Valor, Ex: 99,99':
+            self.inserir_valor.delete(0, END)
+            self.inserir_valor.config(fg='black')
+
+#########################################################################################
+
+class HabilitarVNCCaixa(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg=amarelo_nissei)
+        self.controller = controller
+
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
+
+        self.texto_titulo_habilitar = Label(self, text="Habilitar conexão VNC no Caixa", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
+        self.texto_titulo_habilitar.pack(pady=20)
+
+        self.aviso = Label(self, text="EM CONSTRUÇÃO", bg=amarelo_nissei, fg="red", font=("Arial", 20, "bold"))
+        self.aviso.pack(pady=1)
+
+        self.texto_status_vnc = Label(self, text="", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
+        self.texto_status_vnc.pack(pady=20)
+
+        #Button(self, text="Habilitar VNC", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.habilitar_vnc).pack(pady=5)
+        Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="#ffffff", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_vnc.config(text="")]).pack(pady=30)
+
+    def habilitar_vnc(self):
+        resultado_habilitar = iniciar_vnc(self.controller.conn, self.controller.ip_caixa)
+        self.texto_status_vnc.config(text=resultado_habilitar)
 
 #########################################################################################
 

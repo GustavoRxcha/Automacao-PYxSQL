@@ -35,8 +35,7 @@ def atualizar_biometria_caixa(conn):
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT OPERADOR, NOME, ABERTURA_CAIXA, FECHAMENTO_CAIXA, CANCELAMENTO_CUPOM, SANGRIA_CAIXA, SUPERVISOR FROM OPERADORES WHERE OPERADOR = '36051'")
-        # cursor.execute("TRUNCATE TABLE OPERADORES; INSERT INTO OPERADORES SELECT * FROM [BALCAO].LOJA.DBO.OPERADORES; TRUNCATE TABLE BIOMETRIAS; INSERT INTO BIOMETRIAS(BIOMETRIA, DATA_HORA, TIPO, CODIGO, STATUS, NITGEN_ISDB, VENDEDOR) SELECT BIOMETRIA, DATA_HORA, TIPO, CODIGO, STATUS, NITGEN_ISDB, VENDEDOR FROM [BALCAO].LOJA.DBO.BIOMETRIAS;")
+        cursor.execute("TRUNCATE TABLE OPERADORES; INSERT INTO OPERADORES SELECT * FROM [BALCAO].LOJA.DBO.OPERADORES; TRUNCATE TABLE BIOMETRIAS; INSERT INTO BIOMETRIAS(BIOMETRIA, DATA_HORA, TIPO, CODIGO, STATUS, NITGEN_ISDB, VENDEDOR) SELECT BIOMETRIA, DATA_HORA, TIPO, CODIGO, STATUS, NITGEN_ISDB, VENDEDOR FROM [BALCAO].LOJA.DBO.BIOMETRIAS;")
         conn.commit()
         
         return f"Feito atualização de Biometrias no caixa selecionado!\nTRUNCATE - Ctrl + T"
@@ -72,6 +71,31 @@ def tabela_zero_caixa(conn):
 
     cursor.close()
 
+# --------------------------------------------------------------------------------
+
+def verificar_vendas_caixa(conn, data_movimento, valor_compra):
+
+    cursor = conn.cursor()
+
+    try:
+        dir_atual = Path(__file__).parent  
+        caminho_script_vendas = dir_atual / "ScriptsSQL" / "script_verificar_vendas.sql"
+        with open(caminho_script_vendas, 'r', encoding='utf-8') as file:
+            vendas_caixa = file.read()
+
+        cursor.execute(vendas_caixa, (data_movimento, valor_compra,))
+        resultados = cursor.fetchall()
+
+        colunas = [column[0] for column in cursor.description]
+
+        vendas_formatadas = [dict(zip(colunas, linha)) for linha in resultados]
+        return vendas_formatadas
+
+    except Exception as e:
+        return f"Erro ao executar o script: {e}"
+
+
+    cursor.close()
 # --------------------------------------------------------------------------------
 
 # conn.close()
