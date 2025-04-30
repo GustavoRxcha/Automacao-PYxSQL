@@ -116,7 +116,7 @@ def habilitar_datahub(conn):
 def atualizar_biometria(conn, matricula):
 
     dir_atual = Path(__file__).parent  
-    caminho_script_atualizar_bio = dir_atual / "ScriptsSQL" / "atualizar_biometria_loja.sql"
+    caminho_script_atualizar_bio = dir_atual / "ScriptsSQL" / "script_atualizar_biometria.sql"
 
     with open(caminho_script_atualizar_bio, 'r', encoding='utf-8') as file:
         script = file.read()
@@ -125,6 +125,10 @@ def atualizar_biometria(conn, matricula):
 
     cursor.execute(script, matricula)
     conn.commit()
+
+    cursor.execute("SELECT a.CARGO_DESCONTO FROM VENDEDORES AS a JOIN CARGOS_DESCONTOS AS b ON a.CARGO_DESCONTO = b.CARGO_DESCONTO WHERE a.VENDEDOR = ?", (matricula,))
+    resultado = cursor.fetchone()
+    cargo_desconto = resultado[0]
 
     cursor.execute("""
                    SELECT OPERADOR, NOME, ABERTURA_CAIXA, FECHAMENTO_CAIXA, CANCELAMENTO_CUPOM, SANGRIA_CAIXA, SUPERVISOR
@@ -137,7 +141,7 @@ def atualizar_biometria(conn, matricula):
         (numero_matricula, nome, abertura_caixa, 
          fechamento_caixa, cancelamento_cupom, sangria_caixa, supervisor) = linha  # Desempacotamento
         
-        return f"Matrícula: {numero_matricula} foi atualizada! \n{nome}\n \nAbertura de Caixa: {'Sim' if abertura_caixa == 'S' else 'Não'} \nFechamento de Caixa: {'Sim' if fechamento_caixa == 'S' else 'Não'} \nCancelamento de Cupom: {'Sim' if cancelamento_cupom == 'S' else 'Não'} \nSangria de Caixa: {'Sim' if sangria_caixa == 'S' else 'Não'} \nSupervisor: {'Sim' if supervisor == 'S' else 'Não'}"
+        return f"Matrícula: {numero_matricula} foi atualizada!\n{nome}\nCargo: {cargo_desconto} \n\nAbertura de Caixa: {'Sim' if abertura_caixa == 'S' else 'Não'} \nFechamento de Caixa: {'Sim' if fechamento_caixa == 'S' else 'Não'} \nCancelamento de Cupom: {'Sim' if cancelamento_cupom == 'S' else 'Não'} \nSangria de Caixa: {'Sim' if sangria_caixa == 'S' else 'Não'} \nSupervisor: {'Sim' if supervisor == 'S' else 'Não'}"
     else:
         return f"Nenhum colaborador encontrado com a matrícula {matricula}"
 
@@ -155,11 +159,7 @@ def integrar_nota(conn, NF):
 
     cursor = conn.cursor()
 
-    cursor.execute("""
-        EXEC('SELECT PEDIDO_COMPRA, NF_COMPRA 
-            FROM NF_COMPRA 
-            WHERE CHAVE_NFE = ?') AT RETAGUARDA
-            """, (NF,))
+    cursor.execute("EXEC('SELECT PEDIDO_COMPRA, NF_COMPRA FROM NF_COMPRA WHERE CHAVE_NFE = ?') AT RETAGUARDA", (NF,))
     
     select_pedido_nf = cursor.fetchone()
 
@@ -220,8 +220,6 @@ def atualizar_estoque(conn):
     cursor.close()
 
 #--------------------------------------------------------------------------------
-
-import subprocess
 
 def limpar_temp_ps1(ip_maquina_remota):
     # Caminho do PsExec
