@@ -73,7 +73,7 @@ def tabela_zero_caixa(conn):
 
 # --------------------------------------------------------------------------------
 
-def verificar_vendas_caixa(conn, data_movimento, valor_compra):
+def verificar_vendas_caixa(conn, data, valor):
 
     cursor = conn.cursor()
 
@@ -83,13 +83,15 @@ def verificar_vendas_caixa(conn, data_movimento, valor_compra):
         with open(caminho_script_vendas, 'r', encoding='utf-8') as file:
             vendas_caixa = file.read()
 
-        cursor.execute(vendas_caixa, (data_movimento, valor_compra,))
-        resultados = cursor.fetchall()
+        cursor.execute(vendas_caixa, (data, valor,))
+        linha = cursor.fetchone()
 
-        colunas = [column[0] for column in cursor.description]
+        if linha:
+            (forma_pagamento, status, valor, troco, cupom, nsu, numero_venda) = linha  # Desempacotamento
 
-        vendas_formatadas = [dict(zip(colunas, linha)) for linha in resultados]
-        return vendas_formatadas
+            return f"Pagamento em: {forma_pagamento}\n STATUS: {status}\n Valor: {valor}\n Troco: {troco}\n CUPOM: {cupom}\n NSU: {nsu}\n N° Venda: {numero_venda}"
+        else:
+            return "Não foi encontrada venda com as informações informadas."
 
     except Exception as e:
         return f"Erro ao executar o script: {e}"

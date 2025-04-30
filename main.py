@@ -87,16 +87,13 @@ class Homepage(Frame):
         ip_loja = self.controller.ip + "24"
         print(ip_loja)
 
-        ip_loja = r'localhost\SQLEXPRESS' #APAGAR
-
         if len(ip_loja) > 5:
             self.controller.conn = pyodbc.connect(
                 f'DRIVER={{ODBC Driver 17 for SQL Server}};'
                 f'SERVER={ip_loja};'
                 f'DATABASE=LOJA;'
-                'Trusted_Connection=yes;' #APAGAR
-                # f'UID=sa;'
-                # f'PWD=ERPM@2017;'
+                f'UID=sa;'
+                f'PWD=ERPM@2017;'
                 'Connection Timeout=3;'
             )
             print("Conectado com sucesso ao banco!")
@@ -457,17 +454,14 @@ class HomepageCaixa(Frame):
         self.controller.ip_caixa = self.controller.ip + caixa_selecionado
         print(self.controller.ip_caixa)
 
-        self.controller.ip_caixa = r'localhost\SQLEXPRESS' #APAGAR
-
         try:
             if len(caixa_selecionado) < 2 or caixa_selecionado == None:
                 self.controller.conn = pyodbc.connect(
                     f'DRIVER={{ODBC Driver 17 for SQL Server}};'
                     f'SERVER={self.controller.ip_caixa};'
-                    f'DATABASE=LOJA;'
-                    'Trusted_Connection=yes;' #APAGAR
-                    # f'UID=sa;'
-                    # f'PWD=ERPM@2017;'
+                    f'DATABASE=PDV;'
+                    f'UID=sa;'
+                    f'PWD=ERPM@2017;'
                     'Connection Timeout=3;'
                 )
                 print("Conectado com sucesso ao banco!")
@@ -678,7 +672,7 @@ class ConsultarVendaCaixa(Frame):
         self.titulo_consulta = Label(self, text="Consulta de vendas no Caixa", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
         self.titulo_consulta.pack(pady=(30,15))
 
-        self.titulo_consulta = Label(self, text="Utilize a parametrização DD/MM/AAAA e 99,99", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold", "underline"))
+        self.titulo_consulta = Label(self, text="Utilize a parametrização DD/MM/AAAA e 9.99", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold", "underline"))
         self.titulo_consulta.pack(pady=10)
 
         self.inserir_data = Entry(self, fg='grey', width=30, font=("Arial", 15))
@@ -690,7 +684,7 @@ class ConsultarVendaCaixa(Frame):
         self.titulo_consulta.pack(pady=1)
 
         self.inserir_valor = Entry(self, fg='grey', width=30, font=("Arial", 15))
-        self.inserir_valor.insert(0, 'Informe o Valor, Ex: 99,99')
+        self.inserir_valor.insert(0, 'Informe o Valor, Ex: 9.99')
         self.inserir_valor.bind('<FocusIn>', self.quando_clicar)
         self.inserir_valor.pack(pady=10)
 
@@ -708,7 +702,7 @@ class ConsultarVendaCaixa(Frame):
         self.inserir_valor.delete(0, END)
 
         if data_digitada and valor_digitado:
-            vendas_efetuadas = atualizar_versao(self.controller.conn, data_digitada, valor_digitado)
+            vendas_efetuadas = verificar_vendas_caixa(self.controller.conn, data_digitada, valor_digitado)
             self.historico_vendas.config(text=vendas_efetuadas, fg=azul_nissei)
         else:
             self.historico_vendas.config(text="Preencha os campos corretamente.", fg="red")
@@ -718,7 +712,7 @@ class ConsultarVendaCaixa(Frame):
             self.inserir_data.delete(0, END)
             self.inserir_data.config(fg='black')
 
-        if self.inserir_valor.get() == 'Informe o Valor, Ex: 99,99':
+        if self.inserir_valor.get() == 'Informe o Valor, Ex: 9.99':
             self.inserir_valor.delete(0, END)
             self.inserir_valor.config(fg='black')
 
