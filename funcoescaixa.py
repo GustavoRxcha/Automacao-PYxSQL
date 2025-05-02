@@ -73,7 +73,7 @@ def tabela_zero_caixa(conn):
 
 # --------------------------------------------------------------------------------
 
-def verificar_vendas_caixa(conn, data_movimento, valor_compra):
+def verificar_vendas_caixa(conn, data, valor, status):
 
     cursor = conn.cursor()
 
@@ -83,19 +83,24 @@ def verificar_vendas_caixa(conn, data_movimento, valor_compra):
         with open(caminho_script_vendas, 'r', encoding='utf-8') as file:
             vendas_caixa = file.read()
 
-        cursor.execute(vendas_caixa, (data_movimento, valor_compra,))
-        resultados = cursor.fetchall()
+        cursor.execute(vendas_caixa, (data, valor, status))
+        linha = cursor.fetchone()
 
-        colunas = [column[0] for column in cursor.description]
+        if linha:
+            (forma_pagamento, status, valor, troco, cupom, nsu, numero_venda) = linha
 
-        vendas_formatadas = [dict(zip(colunas, linha)) for linha in resultados]
-        return vendas_formatadas
+            if status == 'A':
+                return f"Pagamento em: {forma_pagamento}\nSTATUS: {status}\nValor: {valor}\nTroco: {troco}\nCUPOM: {cupom}\nNSU: {nsu}\nN° Venda: {numero_venda}"
+            elif status == 'C':
+                return f"Pagamento em: {forma_pagamento}\nSTATUS: {status}\nValor: {valor}\nTroco: {troco}\nCUPOM: {cupom}\nNSU: {nsu}\nN° Venda: {numero_venda}"
+        else:
+            return "Não há informação."
 
     except Exception as e:
         return f"Erro ao executar o script: {e}"
 
-
     cursor.close()
+
 # --------------------------------------------------------------------------------
 
 # conn.close()
