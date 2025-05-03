@@ -12,13 +12,13 @@ class Aplicacao(Tk):
     def __init__(self):
         Tk.__init__(self)
         self.title("Comandos SQL Nissei")
-        self.geometry("550x700")
+        self.geometry("600x750")
         self.configure(bg=amarelo_nissei)
 
         self.filial = ""
 
         logo = Image.open("Logo_nissei.png")  # pode ser .jpg, .png etc
-        logo = logo.resize((290, 140))  # redimensiona, se quiser
+        logo = logo.resize((330, 180))  # redimensiona, se quiser
         self.logo_tk = ImageTk.PhotoImage(logo)
 
         # Container principal
@@ -166,7 +166,7 @@ class MenuProblemas(Frame):
 
     def atualizar(self):
         filial = self.controller.filial
-        self.texto_menu.config(text=f"CORREÇÕES DE PROBLEMAS\n\nFILIAL: {filial}") 
+        self.texto_menu.config(text=f"CORREÇÕES DE PROBLEMAS\n\nFILIAL: {filial}")
 #########################################################################################
 
 class DataHub(Frame):
@@ -351,7 +351,7 @@ class AtualizarVersaoLoja(Frame):
         Button(self, text="Consultar Versão", width=15, height=1, bg=azul_nissei, fg="#ffffff", font=("Arial", 14), command=self.consulta_de_versao).pack(pady=5)
         Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="white", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_versao.config(text="Versão atual:")]).pack(pady=5)
 
-        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: -----------             \nPREVENDA: 1.102.081", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
+        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: 3.0.0.280            \nPREVENDA: 1.102.081", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
         self.info_versao.pack(pady=30)
 
     def consulta_de_versao(self):
@@ -362,8 +362,11 @@ class AtualizarVersaoLoja(Frame):
         versao_digitada = self.inserir_versao.get()
         self.inserir_versao.delete(0, END)
 
-        resultado_atualizacao = atualizar_versao(self.controller.conn, versao_digitada)
-        self.texto_versao.config(text=f"Versão atual PREVENDA {resultado_atualizacao}")
+        if len(versao_digitada) > 6:
+            resultado_atualizacao = atualizar_versao(self.controller.conn, versao_digitada)
+            self.texto_versao.config(text=f"Versão atual PREVENDA {resultado_atualizacao}")
+        else:
+            return
 
     def quando_clicar(self, event):
         if self.inserir_versao.get() == 'Informe a versão...':
@@ -445,17 +448,17 @@ class HomepageCaixa(Frame):
         self.texto_erro_selecionar_caixa.pack(pady=30, padx=40)
 
     def confirmar_caixa(self):
-        caixa_selecionado = self.entrada.get()
+        self.controller.caixa_selecionado = self.entrada.get()
         self.entrada.delete(0, END)
 
-        if caixa_selecionado.strip() == "" or caixa_selecionado == "Digite aqui..." or caixa_selecionado == '0':
+        if self.controller.caixa_selecionado.strip() == "" or self.controller.caixa_selecionado == "Digite aqui..." or self.controller.caixa_selecionado == '0':
             return
         
-        self.controller.ip_caixa = self.controller.ip + caixa_selecionado
+        self.controller.ip_caixa = self.controller.ip + self.controller.caixa_selecionado
         print(self.controller.ip_caixa)
 
         try:
-            if len(caixa_selecionado) < 2 or caixa_selecionado == None:
+            if len(self.controller.caixa_selecionado) < 2 or self.controller.caixa_selecionado == None:
                 self.controller.conn = pyodbc.connect(
                     f'DRIVER={{ODBC Driver 17 for SQL Server}};'
                     f'SERVER={self.controller.ip_caixa};'
@@ -516,7 +519,8 @@ class MenuProblemasCaixa(Frame):
         
     def atualizar(self):
         filial = self.controller.filial
-        self.texto_menu.config(text=f"CORREÇÕES DE PROBLEMAS CAIXA\n\nFILIAL: {filial}")
+        caixa = self.controller.caixa_selecionado
+        self.texto_menu.config(text=f"CORREÇÕES DE PROBLEMAS CAIXA\n\nFILIAL: {filial}\nCAIXA: {caixa}")
 
 #########################################################################################
 
@@ -620,7 +624,7 @@ class AtualizarVersaoCaixa(Frame):
         Button(self, text="Consultar Versão", width=15, height=1, bg=azul_nissei, fg="#ffffff", font=("Arial", 14), command=self.consulta_de_versao).pack(pady=5)
         Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="white", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_versao.config(text="Versão atual:")]).pack(pady=5)
 
-        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: -----------             \nPREVENDA: 1.102.081", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
+        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: 3.0.0.280             \nPREVENDA: 1.102.081", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
         self.info_versao.pack(pady=30)
 
     def consulta_de_versao(self):
@@ -676,9 +680,9 @@ class ConsultarVendaCaixa(Frame):
         self.titulo_consulta.pack(pady=10)
 
         self.inserir_data = Entry(self, fg='grey', width=30, font=("Arial", 15))
-        self.inserir_data.insert(0, 'Informe a data, Ex: DD/MM/AAAA')
+        self.inserir_data.insert(0, 'Informe a data...')
         self.inserir_data.bind('<FocusIn>', self.quando_clicar)
-        self.inserir_data.pack(pady=10)
+        self.inserir_data.pack(pady=(5, 1))
 
         self.titulo_consulta = Label(self, text="&", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
         self.titulo_consulta.pack(pady=1)
@@ -686,13 +690,22 @@ class ConsultarVendaCaixa(Frame):
         self.inserir_valor = Entry(self, fg='grey', width=30, font=("Arial", 15))
         self.inserir_valor.insert(0, 'Informe o Valor, Ex: 9.99')
         self.inserir_valor.bind('<FocusIn>', self.quando_clicar)
-        self.inserir_valor.pack(pady=10)
+        self.inserir_valor.pack(pady=(1, 10))
+
+        self.erro_preenchimento = Label(self, text="", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"), anchor="center", justify="center")
+        self.erro_preenchimento.pack(pady=5, fill='x')
 
         Button(self, text="Consultar Venda", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.consultar_vendas).pack(pady=5)
-        Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="white", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.historico_vendas.config(text="", fg="black")]).pack(pady=5)
+        Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="white", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.erro_preenchimento.config(text="", fg="black")]).pack(pady=5)
 
-        self.historico_vendas = Label(self, text="", bg="#ffffff", fg=azul_nissei, font=("Arial", 13, "bold"), anchor="center", justify="center")
-        self.historico_vendas.pack(pady=30, fill='x')
+        frame_labels = Frame(self, bg="#ffffff")
+        frame_labels.pack(pady=5, padx=10, fill='x')
+
+        self.historico_vendas_aprovadas = Label(self, text="", bg="#86fe94", fg=azul_nissei, font=("Arial", 10, "bold"), anchor="center", justify="center")
+        self.historico_vendas_aprovadas.pack(side="left", expand=True, fill='both')
+
+        self.historico_vendas_canceladas = Label(self, text="", bg="#ff9494", fg=azul_nissei, font=("Arial", 10, "bold"), anchor="center", justify="center")
+        self.historico_vendas_canceladas.pack(side="left", expand=True, fill='both')
 
     def consultar_vendas(self):
         data_digitada = self.inserir_data.get()
@@ -702,13 +715,18 @@ class ConsultarVendaCaixa(Frame):
         self.inserir_valor.delete(0, END)
 
         if data_digitada and valor_digitado:
-            vendas_efetuadas = verificar_vendas_caixa(self.controller.conn, data_digitada, valor_digitado)
-            self.historico_vendas.config(text=vendas_efetuadas, fg=azul_nissei)
+            self.erro_preenchimento.config(text="", fg="red")
+            vendas_aprovadas = verificar_vendas_caixa(self.controller.conn, data_digitada, valor_digitado, 'A')
+            self.historico_vendas_aprovadas.config(text=vendas_aprovadas, fg=azul_nissei)
+
+            vendas_canceladas = verificar_vendas_caixa(self.controller.conn, data_digitada, valor_digitado, 'C')
+            self.historico_vendas_canceladas.config(text=vendas_canceladas, fg=azul_nissei)
+
         else:
-            self.historico_vendas.config(text="Preencha os campos corretamente.", fg="red")
+            self.erro_preenchimento.config(text="Preencha os campos corretamente.", fg="red")
 
     def quando_clicar(self, event):
-        if self.inserir_data.get() == 'Informe a data, Ex: DD/MM/AAAA':
+        if self.inserir_data.get() == 'Informe a data...':
             self.inserir_data.delete(0, END)
             self.inserir_data.config(fg='black')
 

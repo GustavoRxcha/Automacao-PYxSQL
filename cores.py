@@ -1,2 +1,2 @@
-amarelo_nissei = '#ffd204'
+amarelo_nissei = '#ffe600'
 azul_nissei = '#015b90'
