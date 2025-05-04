@@ -1,5 +1,6 @@
 import subprocess
 import paramiko
+import time
 
 
 
@@ -81,8 +82,9 @@ def limpar_temp_remoto(ip_maquina_remota):
 
 def iniciar_vnc(ip_servidor):
 
-    usuario = 'su root' 
-    senha = 'F@RM4C1A'
+    usuario = 'prevenda'
+    senha = 'Nissei@2018'
+    senha_root = 'F@RM4C1A'
 
     try:
         # Cria a conexão SSH
@@ -90,30 +92,67 @@ def iniciar_vnc(ip_servidor):
         cliente_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Ignora a verificação de chave do host
         cliente_ssh.connect(ip_servidor, username=usuario, password=senha)
 
-        comando = 'sudo service x11vnc start'
+        # Abre um shell interativo
+        shell = cliente_ssh.invoke_shell()
+        time.sleep(1)
 
-        # Executa o comando
-        stdin, stdout, stderr = cliente_ssh.exec_command(comando)
+        shell.send('su root\n')
+        time.sleep(1)
 
-        stdin.write(senha + '\n')
-        stdin.flush()
+        shell.send(senha_root + '\n')
+        time.sleep(2)
 
-        saida = stdout.read().decode()
-        erros = stderr.read().decode()
+        # Inicia o serviço VNC
+        shell.send('service x11vnc start\n')
+        time.sleep(2)
 
-        if saida:
-            print("Saída:", saida)
-
-        if erros:
-            print("Erros:", erros)
-        else:
-            print("Comando executado com sucesso!")
+        # Lê a saída do shell
+        output = shell.recv(9999).decode('utf-8')
+        print("Saída do terminal:\n", output)
 
     except Exception as e:
-        print(f"Ocorreu um erro: {e}")
+        print(f"Erro ao conectar ou executar o comando: {e}")
     finally:
-        # Fecha a conexão SSH
         cliente_ssh.close()
 
-# Exemplo de chamada da função:
-iniciar_vnc('192.168.1.100')
+
+#iniciar_vnc('10.18.52.3')
+
+################################################################################################
+
+def mount_a(ip_servidor):
+
+    usuario = 'prevenda'
+    senha = 'Nissei@2018'
+    senha_root = 'F@RM4C1A'
+
+    try:
+        # Cria a conexão SSH
+        cliente_ssh = paramiko.SSHClient()
+        cliente_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Ignora a verificação de chave do host
+        cliente_ssh.connect(ip_servidor, username=usuario, password=senha)
+
+        # Abre um shell interativo
+        shell = cliente_ssh.invoke_shell()
+        time.sleep(1)
+
+        shell.send('su root\n')
+        time.sleep(1)
+
+        shell.send(senha_root + '\n')
+        time.sleep(2)
+
+        # Inicia o serviço VNC
+        shell.send('mount -a\n')
+        time.sleep(2)
+
+        # Lê a saída do shell
+        output = shell.recv(9999).decode('utf-8')
+        print("Saída do terminal:\n", output)
+
+    except Exception as e:
+        print(f"Erro ao conectar ou executar o comando: {e}")
+    finally:
+        cliente_ssh.close()
+
+mount_a('10.18.52.3')
