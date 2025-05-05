@@ -30,7 +30,7 @@ class Aplicacao(Tk):
                                                                                                
         for T in (Homepage, MenuProblemas, DataHub, AtualizarEstoque, AtualizarBiometria, IntegrarNota, AtualizarVersaoLoja, LimparTemp,                                    #<--LOJA
                   HomepageCaixa, MenuProblemasCaixa, HabilitarCartaoPresente, AtualizarBiometriaCaixa, AtualizarVersaoCaixa, TabelaZeroCaixa,                               #<--CAIXA
-                  ConsultarVendaCaixa, HabilitarVNCCaixa):                                                                                                                  #<--CAIXA
+                  ConsultarVendaCaixa, HabilitarVNCCaixa, CupomContingencia):                                                                                                                  #<--CAIXA
             tela = T(container, self)
             self.telas[T] = tela
             tela.grid(row=0, column=0, sticky="nsew")
@@ -503,6 +503,8 @@ class MenuProblemasCaixa(Frame):
             ("Atualizar Versão\nPDV", lambda: self.controller.mostrar_tela(AtualizarVersaoCaixa), azul_nissei),
             ("Verificar Vendas", lambda: self.controller.mostrar_tela(ConsultarVendaCaixa), azul_nissei),
             ("Habilitar VNC", lambda: self.controller.mostrar_tela(HabilitarVNCCaixa), azul_nissei),
+            ("Cupom\nem Contingência", lambda: self.controller.mostrar_tela(CupomContingencia), azul_nissei),
+            ("-------", lambda: self.controller.mostrar_tela(MenuProblemasCaixa), azul_nissei),
             ("Alterar caixa", lambda: self.controller.mostrar_tela(HomepageCaixa), "#ee3642"),
             ("Alterar filial", lambda: self.controller.mostrar_tela(Homepage), "#ee3642"),
         ]
@@ -746,18 +748,45 @@ class HabilitarVNCCaixa(Frame):
         self.texto_titulo_habilitar = Label(self, text="Habilitar conexão VNC no Caixa", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
         self.texto_titulo_habilitar.pack(pady=20)
 
-        self.aviso = Label(self, text="EM CONSTRUÇÃO", bg=amarelo_nissei, fg="red", font=("Arial", 20, "bold"))
-        self.aviso.pack(pady=1)
+        Button(self, text="Habilitar VNC", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.habilitar_vnc).pack(pady=5)
+        Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="#ffffff", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_vnc.config(text="")]).pack(pady=30)
 
         self.texto_status_vnc = Label(self, text="", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
         self.texto_status_vnc.pack(pady=20)
 
-        #Button(self, text="Habilitar VNC", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.habilitar_vnc).pack(pady=5)
-        Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="#ffffff", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_vnc.config(text="")]).pack(pady=30)
-
     def habilitar_vnc(self):
-        resultado_habilitar = iniciar_vnc(self.controller.conn, self.controller.ip_caixa)
-        self.texto_status_vnc.config(text=resultado_habilitar)
+
+        try:
+            iniciar_vnc(self.controller.ip_caixa)
+            self.texto_status_vnc.config(text="VNC habilitado para acessar terminal!")
+        except:
+            self.texto_status_vnc.config(text="ERRO ao habilitar VNC no caixa\n\nVerificar com FIlial.")
+
+#########################################################################################
+
+class CupomContingencia(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg=amarelo_nissei)
+        self.controller = controller
+
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
+
+        self.texto_contingencia = Label(self, text="Cupom em Contingência\n(mount -a)", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 20, "bold"))
+        self.texto_contingencia.pack(pady=20)
+
+        Button(self, text="Corrigir", width=15, height=1, bg="green", fg="#ffffff", font=("Arial", 14), command=self.corrigir_contingencia).pack(pady=5)
+        Button(self, text="Voltar para Menu", width=15, height=1, bg="#ee3642", fg="#ffffff", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_contingencia.config(text="")]).pack(pady=30)
+
+        self.texto_status_contingencia = Label(self, text="", bg=amarelo_nissei, fg=azul_nissei, font=("Arial", 15, "bold"))
+        self.texto_status_contingencia.pack(pady=20)
+
+    def corrigir_contingencia(self):
+
+        try:
+            mount_a(self.controller.ip_caixa)
+            self.texto_status_contingencia.config(text="Efetuado 'mount -a', Caixa corrigido.")
+        except:
+            self.texto_status_contingencia.config(text="ERRO ao executar o script, verificar problema.")
 
 #########################################################################################
 

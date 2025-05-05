@@ -1,5 +1,7 @@
 import pyodbc
 from pathlib import *
+import paramiko
+import time
 
 # def limpeza_log_caixa(conn):
 
@@ -102,6 +104,70 @@ def verificar_vendas_caixa(conn, data, valor, status_venda):
         return f"Erro ao executar o script: {e}"
 
     cursor.close()
+
+# --------------------------------------------------------------------------------
+
+def iniciar_vnc(ip_servidor):
+
+    usuario = 'prevenda'
+    senha = 'Nissei@2018'
+    senha_root = 'F@RM4C1A'
+
+    try:
+        cliente_ssh = paramiko.SSHClient()
+        cliente_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Ignora a verificação de chave do host
+        cliente_ssh.connect(ip_servidor, username=usuario, password=senha)
+
+        # Abre um shell
+        shell = cliente_ssh.invoke_shell()
+        time.sleep(1)
+
+        shell.send('su root\n')
+        time.sleep(1)
+
+        shell.send(senha_root + '\n')
+        time.sleep(2)
+
+        # Inicia o serviço VNC
+        shell.send('service x11vnc start\n')
+        time.sleep(2)
+
+    except Exception as e:
+        print(f"Erro ao conectar ou executar o comando: {e}")
+    finally:
+        cliente_ssh.close()
+
+# --------------------------------------------------------------------------------
+
+def mount_a(ip_servidor):
+
+    usuario = 'prevenda'
+    senha = 'Nissei@2018'
+    senha_root = 'F@RM4C1A'
+
+    try:
+        cliente_ssh = paramiko.SSHClient()
+        cliente_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Ignora a verificação de chave do host
+        cliente_ssh.connect(ip_servidor, username=usuario, password=senha)
+
+        # Abre um shell
+        shell = cliente_ssh.invoke_shell()
+        time.sleep(1)
+
+        shell.send('su root\n')
+        time.sleep(1)
+
+        shell.send(senha_root + '\n')
+        time.sleep(2)
+
+        # Inicia o serviço VNC
+        shell.send('mount -a\n')
+        time.sleep(2)
+
+    except Exception as e:
+        print(f"Erro ao conectar ou executar o comando: {e}")
+    finally:
+        cliente_ssh.close()
 
 # --------------------------------------------------------------------------------
 
