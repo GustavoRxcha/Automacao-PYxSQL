@@ -70,6 +70,8 @@ def tabela_zero_caixa(conn):
         cursor.execute(tabela_zero_2)
         cursor.execute("exec USP_SINCRONIZA_TABELAS_PDV_LOJA")
         return f"feito a criação da USP e correção de Tabela 0"
+    finally:
+        return f"ERRO, não foi possível fazer a correção de Tabela 0"
 
     cursor.close()
 

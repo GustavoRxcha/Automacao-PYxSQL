@@ -11,7 +11,7 @@ from cores import *
 class Aplicacao(Tk):
     def __init__(self):
         Tk.__init__(self)
-        self.title("Comandos SQL Nissei")
+        self.title("ExecFlow")
         self.geometry("600x750")
         self.configure(bg=fundo)
 
