@@ -79,7 +79,6 @@ def limpar_temp_remoto(ip_maquina_remota):
 
 ######################################################################################################################################
 
-
 def iniciar_vnc(ip_servidor):
 
     usuario = 'prevenda'
@@ -120,7 +119,7 @@ def iniciar_vnc(ip_servidor):
 
 ################################################################################################
 
-def mount_a(ip_servidor):
+def erro_6f(ip_servidor):
 
     usuario = 'prevenda'
     senha = 'Nissei@2018'
@@ -137,22 +136,40 @@ def mount_a(ip_servidor):
         time.sleep(1)
 
         shell.send('su root\n')
-        time.sleep(1)
-
-        shell.send(senha_root + '\n')
+        time.sleep(1)                                   #LOGIN NO SU ROOT
+        shell.send(senha_root + '\n')               
         time.sleep(2)
 
-        # Inicia o serviço VNC
-        shell.send('mount -a\n')
+        #INICIO DO 6F
+        shell.send('mv /var/opt/mssql/data/PDV.mdf /opt\n')
+        time.sleep(2)
+        shell.send('mv /var/opt/mssql/data/PDV_log.ldf /opt\n')
+        time.sleep(2)
+        shell.send('cd /var/opt/\n')
+        time.sleep(2)
+        shell.send('rm -rf mssql\n')
+        time.sleep(2)
+        shell.send('3\n')                                      #CONFIGURANDO SQL 
+        time.sleep(3)
+        shell.send('Y\n')
+        time.sleep(3)
+        shell.send('8\n')
+        time.sleep(3)
+        shell.send('ERPM@2017\n')
+        time.sleep(2)
+        shell.send('ERPM@2017\n')
+        time.sleep(10)
+
+        shell.send('mv /opt/PDV.mdf /var/opt/mssql/data\n')
+        time.sleep(2)
+        shell.send('mv /opt/PDV_log.ldf /var/opt/mssql/data\n')
         time.sleep(2)
 
-        # Lê a saída do shell
-        output = shell.recv(9999).decode('utf-8')
-        print("Saída do terminal:\n", output)
-
+        #ANEXANDO BANCO
+        shell.send(f"/opt/mssql-tools/bin/sqlcmd -S {ip_servidor} -U sa -P 'ERPM@2017' -Q \"CREATE DATABASE PDV ON (FILENAME = '/var/opt/mssql/data/PDV.mdf'), (FILENAME = '/var/opt/mssql/data/PDV_log.ldf') FOR ATTACH;\"\n")
+        time.sleep(5)
+        
     except Exception as e:
         print(f"Erro ao conectar ou executar o comando: {e}")
     finally:
         cliente_ssh.close()
-
-mount_a('10.18.52.3')
