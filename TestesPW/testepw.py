@@ -54,12 +54,7 @@ def limpar_temp_remoto(ip_maquina_remota):
         "-ExecutionPolicy", "Bypass",  # Ignorar a política de execução
         "-Command",
         (
-            "$temp = $env:TEMP; "
-            "if (Test-Path $temp) { "
-            "    Remove-Item -Path \"$temp\\*\" -Recurse -Force; "
-            "} "
-            "New-Item -Path $temp -ItemType Directory; "
-            "Write-Output 'Temp limpado'"
+            "ipconfig"
         )
     ]
 
@@ -77,6 +72,8 @@ def limpar_temp_remoto(ip_maquina_remota):
     except Exception as e:
         print(f"Erro ao executar PsExec: {e}")
 
+
+limpar_temp_remoto('192.168.153.52')
 ######################################################################################################################################
 
 def iniciar_vnc(ip_servidor):
@@ -166,10 +163,15 @@ def erro_6f(ip_servidor):
         time.sleep(2)
 
         #ANEXANDO BANCO
-        shell.send(f"/opt/mssql-tools/bin/sqlcmd -S {ip_servidor} -U sa -P 'ERPM@2017' -Q \"CREATE DATABASE PDV ON (FILENAME = '/var/opt/mssql/data/PDV.mdf'), (FILENAME = '/var/opt/mssql/data/PDV_log.ldf') FOR ATTACH;\"\n")
-        time.sleep(5)
-        
+        #shell.send(f"/opt/mssql-tools/bin/sqlcmd -S {ip_servidor} -U sa -P 'ERPM@2017' -Q \"CREATE DATABASE PDV ON (FILENAME = '/var/opt/mssql/data/PDV.mdf'), (FILENAME = '/var/opt/mssql/data/PDV_log.ldf') FOR ATTACH;\"\n")
+        #time.sleep(5)
+
+        output = shell.recv(9999).decode('utf-8')
+        print("Saída do terminal:\n", output)
+
     except Exception as e:
         print(f"Erro ao conectar ou executar o comando: {e}")
     finally:
         cliente_ssh.close()
+
+#erro_6f('10.17.196.3')

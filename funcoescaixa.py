@@ -169,6 +169,7 @@ def mount_a(ip_servidor):
     except Exception as e:
         print(f"Erro ao conectar ou executar o comando: {e}")
     finally:
+
         cliente_ssh.close()
 
 # --------------------------------------------------------------------------------

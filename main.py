@@ -90,16 +90,16 @@ class Homepage(Frame):
         ip_loja = self.controller.ip + "24"
         print(ip_loja)
 
-        ip_loja = 'localhost\SQLEXPRESS'
+        #ip_loja = 'localhost\SQLEXPRESS'
 
         if len(ip_loja) > 5:
             self.controller.conn = pyodbc.connect(
                 f'DRIVER={{ODBC Driver 17 for SQL Server}};'
                 f'SERVER={ip_loja};'
                 f'DATABASE=LOJA;'
-                'Trusted_Connection=yes;'
-                # f'UID=sa;'
-                # f'PWD=ERPM@2017;'
+                #'Trusted_Connection=yes;'
+                f'UID=sa;'
+                f'PWD=ERPM@2017;'
                 'Connection Timeout=3;'
             )
             print("Conectado com sucesso ao banco!")
@@ -270,7 +270,7 @@ class AtualizarBiometria(Frame):
         self.texto_matricula_infos = Label(self, text="", bg="#ffffff", fg=cor_texto, font=("Arial", 13, "bold"), anchor="center", justify="center")
         self.texto_matricula_infos.pack(pady=30, fill='x')
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(100, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(50, 10))
 
     def atualizar_bio(self):
         matricula_digitada = self.matricula.get()
@@ -388,7 +388,7 @@ class AtualizarVersaoLoja(Frame):
         botao_voltar_menu_versao.pack(pady=5)
         aplicar_hover(botao_voltar_menu_versao, hover, botao2)
 
-        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: 3.0.0.280            \nPREVENDA: 1.102.081", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"), bd=2, relief="solid")
+        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: 3.0.0.281            \nPREVENDA: 1.102.081", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"), bd=2, relief="solid")
         self.info_versao.pack(pady=30)
 
         Label(self, image=self.controller.logo_tk).pack(pady=(80, 10))
@@ -500,20 +500,20 @@ class HomepageCaixa(Frame):
         if self.controller.caixa_selecionado.strip() == "" or self.controller.caixa_selecionado == "Digite aqui..." or self.controller.caixa_selecionado == '0':
             return
         
-        ip_caixa = self.controller.ip + self.controller.caixa_selecionado
-        print(ip_caixa)
+        self.controller.ip_caixa = self.controller.ip + self.controller.caixa_selecionado
+        print(self.controller.ip_caixa)
 
-        ip_caixa = 'localhost\SQLEXPRESS'
+        #ip_caixa = 'localhost\SQLEXPRESS'
 
         try:
             if len(self.controller.caixa_selecionado) < 2 or self.controller.caixa_selecionado == None:
                 self.controller.conn = pyodbc.connect(
                     f'DRIVER={{ODBC Driver 17 for SQL Server}};'
-                    f'SERVER={ip_caixa};'
-                    f'DATABASE=LOJA;'
-                    'Trusted_Connection=yes;'
-                    # f'UID=sa;'
-                    # f'PWD=ERPM@2017;'
+                    f'SERVER={self.controller.ip_caixa};'
+                    f'DATABASE=PDV;'
+                    #'Trusted_Connection=yes;'
+                    f'UID=sa;'
+                    f'PWD=ERPM@2017;'
                     'Connection Timeout=3;'
                 )
                 print("Conectado com sucesso ao banco!")
@@ -700,7 +700,7 @@ class AtualizarVersaoCaixa(Frame):
         botao_voltar_menu_versao.pack(pady=5)
         aplicar_hover(botao_voltar_menu_versao, hover, botao2)
 
-        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: 3.0.0.280             \nPREVENDA: 1.102.081", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"), bd=2, relief="solid")
+        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: 3.0.0.281             \nPREVENDA: 1.102.081", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"), bd=2, relief="solid")
         self.info_versao.pack(pady=30)
 
         
@@ -782,7 +782,7 @@ class ConsultarVendaCaixa(Frame):
         aplicar_hover(botao_consultar_venda, hover, verde)
 
         botao_voltar_menu_consulta = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.erro_preenchimento.config(text="", fg="black")])
-        botao_voltar_menu_consulta.pack(pady=5)
+        botao_voltar_menu_consulta.pack(pady=(5,20))
         aplicar_hover(botao_voltar_menu_consulta, hover, botao2)
 
         frame_historico = Frame(self)
@@ -794,7 +794,7 @@ class ConsultarVendaCaixa(Frame):
         self.historico_vendas_canceladas = Label(frame_historico, text="", bg=vermelho, fg=cor_texto, font=("Arial", 10, "bold"), anchor="center", justify="center")
         self.historico_vendas_canceladas.pack(side="left", expand=True, fill='both')
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(40, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
 
     def consultar_vendas(self):
         data_digitada = self.inserir_data.get()

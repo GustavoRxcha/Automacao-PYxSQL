@@ -126,9 +126,9 @@ def atualizar_biometria(conn, matricula):
     cursor.execute(script, matricula)
     conn.commit()
 
-    cursor.execute("SELECT a.CARGO_DESCONTO FROM VENDEDORES AS a JOIN CARGOS_DESCONTOS AS b ON a.CARGO_DESCONTO = b.CARGO_DESCONTO WHERE a.VENDEDOR = ?", (matricula,))
-    resultado = cursor.fetchone()
-    cargo_desconto = resultado[0]
+    #cursor.execute("SELECT a.CARGO_DESCONTO FROM VENDEDORES AS a JOIN CARGOS_DESCONTOS AS b ON a.CARGO_DESCONTO = b.CARGO_DESCONTO WHERE a.VENDEDOR = ?", (matricula,))
+    #resultado = cursor.fetchone()
+    #cargo_desconto = resultado[0]
 
     cursor.execute("""
                    SELECT OPERADOR, NOME, ABERTURA_CAIXA, FECHAMENTO_CAIXA, CANCELAMENTO_CUPOM, SANGRIA_CAIXA, SUPERVISOR
@@ -141,7 +141,7 @@ def atualizar_biometria(conn, matricula):
         (numero_matricula, nome, abertura_caixa, 
          fechamento_caixa, cancelamento_cupom, sangria_caixa, supervisor) = linha  # Desempacotamento
         
-        return f"Matrícula: {numero_matricula} foi atualizada!\n{nome}\nCargo: {cargo_desconto} \n\nAbertura de Caixa: {'Sim' if abertura_caixa == 'S' else 'Não'} \nFechamento de Caixa: {'Sim' if fechamento_caixa == 'S' else 'Não'} \nCancelamento de Cupom: {'Sim' if cancelamento_cupom == 'S' else 'Não'} \nSangria de Caixa: {'Sim' if sangria_caixa == 'S' else 'Não'} \nSupervisor: {'Sim' if supervisor == 'S' else 'Não'}"
+        return f"Matrícula: {numero_matricula} foi atualizada!\n{nome} \n\nAbertura de Caixa: {'Sim' if abertura_caixa == 'S' else 'Não'} \nFechamento de Caixa: {'Sim' if fechamento_caixa == 'S' else 'Não'} \nCancelamento de Cupom: {'Sim' if cancelamento_cupom == 'S' else 'Não'} \nSangria de Caixa: {'Sim' if sangria_caixa == 'S' else 'Não'} \nSupervisor: {'Sim' if supervisor == 'S' else 'Não'}"
     else:
         return f"Nenhum colaborador encontrado com a matrícula {matricula}"
 
@@ -209,9 +209,9 @@ def atualizar_estoque(conn):
     cursor = conn.cursor()
 
     try:
-        cursor.execute("update ERPM_UPLOAD set ENVIADO = 'P' where ENVIADO = 'N'")
+        #cursor.execute("update ERPM_UPLOAD set ENVIADO = 'P' where ENVIADO = 'N'")
         cursor.execute("EXEC USP_SINCRONIZACAO_ESTOQUE_LOJA  ")
-        cursor.execute("UPDATE ERPM_UPLOAD SET ENVIADO = 'N' WHERE ENVIADO = 'P'")
+        #cursor.execute("UPDATE ERPM_UPLOAD SET ENVIADO = 'N' WHERE ENVIADO = 'P'")
         
         return f"Estoque da filial atualizado com sucesso!."
     except:
