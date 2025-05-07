@@ -1,6 +1,12 @@
 import pyodbc
 from pathlib import *
 import subprocess
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+usuario_proc = os.getenv("USER_PROC")
+senha_proc = os.getenv("PASS_PROC")
 
 def gerar_ip(filial):
 
@@ -225,18 +231,18 @@ def limpar_temp_ps1(ip_maquina_remota):
     # Caminho do PsExec
     psexec_path = r"C:\caminho\para\PSTools\PsExec.exe"
     
-    usuario = "Administrador"
-    senha = "senha_remota"
-    caminho_script = r"testescript.ps1"
 
     comando = [
         psexec_path,
         f"\\\\{ip_maquina_remota}",
-        "-u", usuario, 
-        "-p", senha,
+        "-u", usuario_proc, 
+        "-p", senha_proc,
         "powershell.exe", 
         "-ExecutionPolicy", "Bypass",  # Ignorar a política de execução
-        "-File", caminho_script 
+        "-Command",
+        (
+            "ipconfig"
+        )
     ]
     
     try:

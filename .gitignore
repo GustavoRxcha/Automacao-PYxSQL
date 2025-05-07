@@ -15,11 +15,5 @@ __pycache__/
 
 # Banco de dados SQLite (caso utilize)
 *.sqlite3
+.env
 
-# Ambiente virtual Python (caso use)
-env/
-venv/
-
-# Arquivos de teste que não precisam ser versionados
-TESTEINTEGRARNOTA.PY
-testecaixa.py

@@ -1,6 +1,8 @@
 import pyodbc
 from tkinter import *
 import subprocess
+from dotenv import load_dotenv
+import os
 from PIL import Image, ImageTk
 from funcoesloja import *
 from funcoescaixa import *
@@ -89,6 +91,10 @@ class Homepage(Frame):
     def conexao_servidor(self):    
         ip_loja = self.controller.ip + "24"
         print(ip_loja)
+        
+        load_dotenv()
+        self.controller.usuario_sql = os.getenv("USER_SQL")
+        self.controller.senha_sql = os.getenv("PASS_SQL")
 
         #ip_loja = 'localhost\SQLEXPRESS'
 
@@ -98,8 +104,8 @@ class Homepage(Frame):
                 f'SERVER={ip_loja};'
                 f'DATABASE=LOJA;'
                 #'Trusted_Connection=yes;'
-                f'UID=sa;'
-                f'PWD=ERPM@2017;'
+                f'UID={self.controller.usuario_sql};'
+                f'PWD={self.controller.senha_sql};'
                 'Connection Timeout=3;'
             )
             print("Conectado com sucesso ao banco!")
@@ -512,8 +518,8 @@ class HomepageCaixa(Frame):
                     f'SERVER={self.controller.ip_caixa};'
                     f'DATABASE=PDV;'
                     #'Trusted_Connection=yes;'
-                    f'UID=sa;'
-                    f'PWD=ERPM@2017;'
+                    f'UID={self.controller.usuario_sql};'
+                    f'PWD={self.controller.senha_sql};'
                     'Connection Timeout=3;'
                 )
                 print("Conectado com sucesso ao banco!")

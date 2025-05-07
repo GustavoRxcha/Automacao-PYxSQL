@@ -3,6 +3,16 @@ from pathlib import *
 import paramiko
 import time
 
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+usuario_linux = os.getenv("USER_LINUX")
+senha_linux = os.getenv("PASS_LINUX")
+senha_root = os.getenv("PASS_ROOT")
+
+# --------------------------------------------------------------------------------
+
 # def limpeza_log_caixa(conn):
 
 #     cursor = conn.cursor()
@@ -111,14 +121,10 @@ def verificar_vendas_caixa(conn, data, valor, status_venda):
 
 def iniciar_vnc(ip_servidor):
 
-    usuario = 'prevenda'
-    senha = 'Nissei@2018'
-    senha_root = 'F@RM4C1A'
-
     try:
         cliente_ssh = paramiko.SSHClient()
         cliente_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Ignora a verificação de chave do host
-        cliente_ssh.connect(ip_servidor, username=usuario, password=senha)
+        cliente_ssh.connect(ip_servidor, username=usuario_linux, password=senha_linux)
 
         # Abre um shell
         shell = cliente_ssh.invoke_shell()
@@ -143,14 +149,10 @@ def iniciar_vnc(ip_servidor):
 
 def mount_a(ip_servidor):
 
-    usuario = 'prevenda'
-    senha = 'Nissei@2018'
-    senha_root = 'F@RM4C1A'
-
     try:
         cliente_ssh = paramiko.SSHClient()
         cliente_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Ignora a verificação de chave do host
-        cliente_ssh.connect(ip_servidor, username=usuario, password=senha)
+        cliente_ssh.connect(ip_servidor, username=usuario_linux, password=senha_linux)
 
         # Abre um shell
         shell = cliente_ssh.invoke_shell()

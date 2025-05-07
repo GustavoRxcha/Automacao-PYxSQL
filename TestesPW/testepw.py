@@ -74,45 +74,6 @@ def limpar_temp_remoto(ip_maquina_remota):
 
 
 limpar_temp_remoto('192.168.153.52')
-######################################################################################################################################
-
-def iniciar_vnc(ip_servidor):
-
-    usuario = 'prevenda'
-    senha = 'Nissei@2018'
-    senha_root = 'F@RM4C1A'
-
-    try:
-        # Cria a conexão SSH
-        cliente_ssh = paramiko.SSHClient()
-        cliente_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Ignora a verificação de chave do host
-        cliente_ssh.connect(ip_servidor, username=usuario, password=senha)
-
-        # Abre um shell interativo
-        shell = cliente_ssh.invoke_shell()
-        time.sleep(1)
-
-        shell.send('su root\n')
-        time.sleep(1)
-
-        shell.send(senha_root + '\n')
-        time.sleep(2)
-
-        # Inicia o serviço VNC
-        shell.send('service x11vnc start\n')
-        time.sleep(2)
-
-        # Lê a saída do shell
-        output = shell.recv(9999).decode('utf-8')
-        print("Saída do terminal:\n", output)
-
-    except Exception as e:
-        print(f"Erro ao conectar ou executar o comando: {e}")
-    finally:
-        cliente_ssh.close()
-
-
-#iniciar_vnc('10.18.52.3')
 
 ################################################################################################
 
