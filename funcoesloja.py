@@ -184,7 +184,7 @@ def integrar_nota(conn, NF):
         (nf_de_compra, empresa, entidade, movimento, nf_serie, 
          nf_numero, pedido_de_compra, produto, descricao, quantidade,) = resultado_formatado
 
-        return f"NF DE COMPRA: {nf_de_compra}, PEDIDO DE COMPRA: {pedido_de_compra}, SERIE NF: {nf_serie}, NÚMERO NF: {nf_numero}, FILIAL: {entidade}"      
+        return f"NF DE COMPRA: {nf_de_compra}\nPEDIDO DE COMPRA: {pedido_de_compra}\nSERIE NF: {nf_serie}\nNÚMERO NF: {nf_numero}\nFILIAL: {entidade}"
     else:
         return f"RESULTADO NÃO FORMATADO: {resultado_nao_formatado}"
 

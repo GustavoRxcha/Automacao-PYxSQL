@@ -107,6 +107,8 @@ def erro_6f(ip_servidor):
         time.sleep(2)
         shell.send('rm -rf mssql\n')
         time.sleep(2)
+        shell.send('/opt/mssql/bin/mssql-conf setup\n')
+        time.sleep(2)
         shell.send('3\n')                                      #CONFIGURANDO SQL 
         time.sleep(3)
         shell.send('Y\n')
