@@ -113,7 +113,7 @@ def verificar_vendas_caixa(conn, data, valor, status_venda):
             return "Não há informação."
 
     except Exception as e:
-        return f"Erro ao executar o script: {e}"
+        return f"Utilizar '.' ao invés de ','"
 
     cursor.close()
 

@@ -222,7 +222,7 @@ def atualizar_estoque(conn):
 
         cursor.execute(script_estoque)
         
-        return f"Estoque da filial atualizado com sucesso!."
+        return f"Estoque da filial atualizado com sucesso!"
     except:
         return f"!ERRO: Não foi possível atualizar o estoque!\n Acessar Banco e verificar."
     
