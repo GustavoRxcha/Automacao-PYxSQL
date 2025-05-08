@@ -215,9 +215,12 @@ def atualizar_estoque(conn):
     cursor = conn.cursor()
 
     try:
-        #cursor.execute("update ERPM_UPLOAD set ENVIADO = 'P' where ENVIADO = 'N'")
-        cursor.execute("EXEC USP_SINCRONIZACAO_ESTOQUE_LOJA  ")
-        #cursor.execute("UPDATE ERPM_UPLOAD SET ENVIADO = 'N' WHERE ENVIADO = 'P'")
+        dir_atual = Path(__file__).parent
+        caminho_script_estoque = dir_atual / "ScriptsSQL" / "script_atualizar_estoque.sql"
+        with open(caminho_script_estoque, 'r', encoding='utf-8') as file:
+            script_estoque = file.read()
+
+        cursor.execute(script_estoque)
         
         return f"Estoque da filial atualizado com sucesso!."
     except:

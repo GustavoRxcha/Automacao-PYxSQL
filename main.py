@@ -8,6 +8,8 @@ from funcoesloja import *
 from funcoescaixa import *
 from cores import *
 
+load_dotenv(dotenv_path="C:/Automação PY X SQL/.env")
+
 #########################################################################################
 
 class Aplicacao(Tk):
@@ -91,8 +93,7 @@ class Homepage(Frame):
     def conexao_servidor(self):    
         ip_loja = self.controller.ip + "24"
         print(ip_loja)
-        
-        load_dotenv()
+
         self.controller.usuario_sql = os.getenv("USER_SQL")
         self.controller.senha_sql = os.getenv("PASS_SQL")
 
