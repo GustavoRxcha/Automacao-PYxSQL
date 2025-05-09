@@ -61,6 +61,11 @@ def atualizar_biometria_caixa(conn):
 def tabela_zero_caixa(conn):
      
     dir_atual = Path(__file__).parent  
+    caminho_tabela_zero = dir_atual / "ScriptsSQL" / "script_tabela_zero.sql"
+    with open(caminho_tabela_zero, 'r', encoding='utf-8') as file:
+        tabela_zero = file.read()
+
+    dir_atual = Path(__file__).parent  
     caminho_tabela_zero_1 = dir_atual / "ScriptsSQL" / "tabela_zero_1.sql"
     with open(caminho_tabela_zero_1, 'r', encoding='utf-8') as file:
         tabela_zero_1 = file.read()
@@ -73,7 +78,7 @@ def tabela_zero_caixa(conn):
     cursor = conn.cursor()
 
     try:
-        cursor.execute("exec USP_SINCRONIZA_TABELAS_PDV")
+        cursor.execute(tabela_zero)
         return f"Erro de Tabela 0 corrigido utilizando a USP"
     except:
         cursor.execute(tabela_zero_1)

@@ -34,7 +34,7 @@ class Aplicacao(Tk):
                                                                                                
         for T in (Homepage, MenuProblemas, DataHub, AtualizarEstoque, AtualizarBiometria, IntegrarNota, AtualizarVersaoLoja, LimparTemp,                                    #<--LOJA
                   HomepageCaixa, MenuProblemasCaixa, HabilitarCartaoPresente, AtualizarBiometriaCaixa, AtualizarVersaoCaixa, TabelaZeroCaixa,                               #<--CAIXA
-                  ConsultarVendaCaixa, HabilitarVNCCaixa, CupomContingencia):                                                                                                                  #<--CAIXA
+                  ConsultarVendaCaixa, HabilitarVNCCaixa, ErroMount_a):                                                                                                                  #<--CAIXA
             tela = T(container, self)
             self.telas[T] = tela
             tela.grid(row=0, column=0, sticky="nsew")
@@ -557,7 +557,7 @@ class MenuProblemasCaixa(Frame):
             ("Atualizar Versão\nPDV", lambda: self.controller.mostrar_tela(AtualizarVersaoCaixa)),
             ("Verificar Vendas", lambda: self.controller.mostrar_tela(ConsultarVendaCaixa)),
             ("Habilitar VNC", lambda: self.controller.mostrar_tela(HabilitarVNCCaixa)),
-            ("Cupom\nem Contingência", lambda: self.controller.mostrar_tela(CupomContingencia)),
+            ("Mount -a", lambda: self.controller.mostrar_tela(ErroMount_a)),
             ("-------", lambda: self.controller.mostrar_tela(MenuProblemasCaixa)),
         ]
 
@@ -863,12 +863,12 @@ class HabilitarVNCCaixa(Frame):
 
 #########################################################################################
 
-class CupomContingencia(Frame):
+class ErroMount_a(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_contingencia = Label(self, text="Cupom em Contingência\n(mount -a)", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
+        self.texto_contingencia = Label(self, text="Erro de diretório PDV\n(Mount -a)", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
         self.texto_contingencia.pack(pady=(60,30))
 
         botao_mount = Button(self, text="Corrigir", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.corrigir_contingencia)
