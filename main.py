@@ -4,7 +4,7 @@ from Funcoes.funcoesloja import *
 from Funcoes.funcoescaixa import *
 from style.cores import *
 
-load_dotenv(dotenv_path="C:/Automação PY X SQL/.env")
+load_dotenv(dotenv_path="Automação PY X SQL/.env")
 
 #########################################################################################
 

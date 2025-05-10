@@ -60,17 +60,17 @@ def atualizar_biometria_caixa(conn):
 def tabela_zero_caixa(conn):
      
     dir_atual = Path(__file__).parent  
-    caminho_tabela_zero = 'C:\\ExecFlow\\Automação PY X SQL\\ScriptsSQL\\script_tabela_zero.sql'
+    caminho_tabela_zero = 'ScriptsSQL\\script_tabela_zero.sql'
     with open(caminho_tabela_zero, 'r', encoding='utf-8') as file:
         tabela_zero = file.read()
 
     dir_atual = Path(__file__).parent  
-    caminho_tabela_zero_1 = 'C:\\ExecFlow\\Automação PY X SQL\\ScriptsSQL\\tabela_zero_1.sql'
+    caminho_tabela_zero_1 = 'ScriptsSQL\\tabela_zero_1.sql'
     with open(caminho_tabela_zero_1, 'r', encoding='utf-8') as file:
         tabela_zero_1 = file.read()
 
     dir_atual = Path(__file__).parent  
-    caminho_tabela_zero_2 = 'C:\\ExecFlow\\Automação PY X SQL\\ScriptsSQL\\tabela_zero_2.sql'
+    caminho_tabela_zero_2 = 'ScriptsSQL\\tabela_zero_2.sql'
     with open(caminho_tabela_zero_2, 'r', encoding='utf-8') as file:
         tabela_zero_2 = file.read()
 
@@ -98,7 +98,7 @@ def verificar_vendas_caixa(conn, data, valor, status_venda):
 
     try:
         dir_atual = Path(__file__).parent  
-        caminho_script_vendas = 'C:\\ExecFlow\\Automação PY X SQL\\ScriptsSQL\\script_verificar_vendas.sql'
+        caminho_script_vendas = 'ScriptsSQL\\script_verificar_vendas.sql'
         with open(caminho_script_vendas, 'r', encoding='utf-8') as file:
             vendas_caixa = file.read()
 
