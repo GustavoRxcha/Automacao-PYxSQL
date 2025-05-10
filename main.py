@@ -1,12 +1,8 @@
-import pyodbc
 from tkinter import *
-import subprocess
-from dotenv import load_dotenv
-import os
 from PIL import Image, ImageTk
-from funcoesloja import *
-from funcoescaixa import *
-from cores import *
+from Funcoes.funcoesloja import *
+from Funcoes.funcoescaixa import *
+from style.cores import *
 
 load_dotenv(dotenv_path="C:/Automação PY X SQL/.env")
 
@@ -21,7 +17,7 @@ class Aplicacao(Tk):
 
         self.filial = ""
 
-        logo = Image.open("EFlogo.png")  # pode ser .jpg, .png etc
+        logo = Image.open("style/EFlogo.png")  # pode ser .jpg, .png etc
         logo = logo.resize((630,130))  # redimensiona, se quiser
         self.logo_tk = ImageTk.PhotoImage(logo)
 
@@ -868,7 +864,7 @@ class ErroMount_a(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_contingencia = Label(self, text="Erro de diretório PDV\n(Mount -a)", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
+        self.texto_contingencia = Label(self, text="Erro de diretório PBM\n(Mount -a)", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
         self.texto_contingencia.pack(pady=(60,30))
 
         botao_mount = Button(self, text="Corrigir", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.corrigir_contingencia)

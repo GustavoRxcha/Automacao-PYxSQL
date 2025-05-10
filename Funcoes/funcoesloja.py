@@ -122,7 +122,7 @@ def habilitar_datahub(conn):
 def atualizar_biometria(conn, matricula):
 
     dir_atual = Path(__file__).parent  
-    caminho_script_atualizar_bio = dir_atual / "ScriptsSQL" / "script_atualizar_biometria.sql"
+    caminho_script_atualizar_bio = 'C:\\ExecFlow\\Automação PY X SQL\\ScriptsSQL\\script_atualizar_biometria.sql'
 
     with open(caminho_script_atualizar_bio, 'r', encoding='utf-8') as file:
         script = file.read()
@@ -158,7 +158,7 @@ def atualizar_biometria(conn, matricula):
 def integrar_nota(conn, NF):
 
     dir_atual = Path(__file__).parent  
-    caminho_script_integrar = dir_atual / "ScriptsSQL" / "scrip_integrar_nf.sql"
+    caminho_script_integrar = 'C:\\ExecFlow\\Automação PY X SQL\\ScriptsSQL\\scrip_integrar_nf.sql'
 
     with open(caminho_script_integrar, 'r', encoding='utf-8') as file:
         script = file.read()
@@ -216,7 +216,7 @@ def atualizar_estoque(conn):
 
     try:
         dir_atual = Path(__file__).parent
-        caminho_script_estoque = dir_atual / "ScriptsSQL" / "script_atualizar_estoque.sql"
+        caminho_script_estoque = 'C:\\ExecFlow\\Automação PY X SQL\\ScriptsSQL\\script_atualizar_estoque.sql'
         with open(caminho_script_estoque, 'r', encoding='utf-8') as file:
             script_estoque = file.read()
 
@@ -232,7 +232,7 @@ def atualizar_estoque(conn):
 
 def limpar_temp_ps1(ip_maquina_remota):
     # Caminho do PsExec
-    psexec_path = r"C:\caminho\para\PSTools\PsExec.exe"
+    psexec_path = r"C:\caminho\para\PSTools\PsExec.exe" #adicionar caminho correto
     
 
     comando = [
