@@ -7,8 +7,7 @@ build_exe_options = {
     "include_files": [
         ".env",
         ("style/EFlogo.png", "style/EFlogo.png"),
-        ("Funcoes/funcoescaixa.py", "Funcoes/funcoescaixa.py"),
-        ("Funcoes/funcoesloja.py", "Funcoes/funcoesloja.py"),
+        ("style/EFico.ico", "style/EFico.ico"),
         ("ScriptsSQL/script_atualizar_biometria.sql", "ScriptsSQL/script_atualizar_biometria.sql"),
         ("ScriptsSQL/script_atualizar_estoque.sql", "ScriptsSQL/script_atualizar_estoque.sql"),
         ("ScriptsSQL/script_integrar_nf.sql", "ScriptsSQL/script_integrar_nf.sql"),
@@ -28,5 +27,5 @@ setup(
     version="0.1",
     description="Automação de processos do HelpDesk",
     options={"build_exe": build_exe_options},
-    executables=[Executable("main.py", base=base, target_name="ExecFlow.exe")]
+    executables=[Executable("main.py", base=base, target_name="ExecFlow.exe", icon="style/EFico.ico")]
 )

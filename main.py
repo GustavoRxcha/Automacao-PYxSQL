@@ -3,9 +3,9 @@ from PIL import Image, ImageTk
 from Funcoes.funcoesloja import *
 from Funcoes.funcoescaixa import *
 from style.cores import *
+from dotenv import load_dotenv
 
-load_dotenv(dotenv_path="Automação PY X SQL/.env")
-
+load_dotenv()
 #########################################################################################
 
 class Aplicacao(Tk):
@@ -30,7 +30,7 @@ class Aplicacao(Tk):
                                                                                                
         for T in (Homepage, MenuProblemas, DataHub, AtualizarEstoque, AtualizarBiometria, IntegrarNota, AtualizarVersaoLoja, LimparTemp,                                    #<--LOJA
                   HomepageCaixa, MenuProblemasCaixa, HabilitarCartaoPresente, AtualizarBiometriaCaixa, AtualizarVersaoCaixa, TabelaZeroCaixa,                               #<--CAIXA
-                  ConsultarVendaCaixa, HabilitarVNCCaixa, ErroMount_a):                                                                                                                  #<--CAIXA
+                  ConsultarVendaCaixa, HabilitarVNCCaixa, ErroMount_a, Erro6F):                                                                                                                  #<--CAIXA
             tela = T(container, self)
             self.telas[T] = tela
             tela.grid(row=0, column=0, sticky="nsew")
@@ -506,14 +506,14 @@ class HomepageCaixa(Frame):
         self.controller.ip_caixa = self.controller.ip + self.controller.caixa_selecionado
         print(self.controller.ip_caixa)
 
-        #ip_caixa = 'localhost\SQLEXPRESS'
+        #self.controller.ip_caixa = 'localhost\SQLEXPRESS'
 
         try:
             if len(self.controller.caixa_selecionado) < 2 or self.controller.caixa_selecionado == None:
                 self.controller.conn = pyodbc.connect(
                     f'DRIVER={{ODBC Driver 17 for SQL Server}};'
                     f'SERVER={self.controller.ip_caixa};'
-                    f'DATABASE=PDV;'
+                    f'DATABASE=PDV;' #PDV-LOJA
                     #'Trusted_Connection=yes;'
                     f'UID={self.controller.usuario_sql};'
                     f'PWD={self.controller.senha_sql};'
@@ -554,7 +554,7 @@ class MenuProblemasCaixa(Frame):
             ("Verificar Vendas", lambda: self.controller.mostrar_tela(ConsultarVendaCaixa)),
             ("Habilitar VNC", lambda: self.controller.mostrar_tela(HabilitarVNCCaixa)),
             ("Mount -a", lambda: self.controller.mostrar_tela(ErroMount_a)),
-            ("-------", lambda: self.controller.mostrar_tela(MenuProblemasCaixa)),
+            ("Correção 6F", lambda: self.controller.mostrar_tela(Erro6F)),
         ]
 
         for i, (texto, comando) in enumerate(botoes):
@@ -864,30 +864,61 @@ class ErroMount_a(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_contingencia = Label(self, text="Erro de diretório PBM\n(Mount -a)", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
-        self.texto_contingencia.pack(pady=(60,30))
+        self.texto_mount = Label(self, text="Erro de diretório PBM\n(Mount -a)", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
+        self.texto_mount.pack(pady=(60,30))
 
-        botao_mount = Button(self, text="Corrigir", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.corrigir_contingencia)
+        botao_mount = Button(self, text="Corrigir", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.corrigir_mount_a)
         botao_mount.pack(pady=5)
         aplicar_hover(botao_mount, hover, verde)
 
-        botao_voltar_menu_mount = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_contingencia.config(text="")])
+        botao_voltar_menu_mount = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_mount.config(text="")])
         botao_voltar_menu_mount.pack(pady=30)
         aplicar_hover(botao_voltar_menu_mount, hover, botao2)
 
-        self.texto_status_contingencia = Label(self, text="", bg=fundo, font=("Arial", 15, "bold"))
-        self.texto_status_contingencia.pack(pady=20)
+        self.texto_status_mount = Label(self, text="", bg=fundo, font=("Arial", 15, "bold"))
+        self.texto_status_mount.pack(pady=20)
 
         
         Label(self, image=self.controller.logo_tk).pack(pady=(100, 10))
 
-    def corrigir_contingencia(self):
+    def corrigir_mount_a(self):
 
         try:
             mount_a(self.controller.ip_caixa)
-            self.texto_status_contingencia.config(text="Efetuado 'mount -a', Caixa corrigido.", fg=verde)
+            self.texto_status_mount.config(text="Efetuado 'mount -a', Caixa corrigido.", fg=verde)
         except:
-            self.texto_status_contingencia.config(text="ERRO ao executar o script, verificar problema.", fg=vermelho)
+            self.texto_status_mount.config(text="ERRO ao executar o script, verificar problema.", fg=vermelho)
+
+#########################################################################################
+
+class Erro6F(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg=fundo)
+        self.controller = controller
+
+        self.texto_6f = Label(self, text="Erro de 6F no PDV", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
+        self.texto_6f.pack(pady=(60,30))
+
+        botao_6f = Button(self, text="Corrigir", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.corrigir_6f)
+        botao_6f.pack(pady=5)
+        aplicar_hover(botao_6f, hover, verde)
+
+        botao_voltar_menu_6f = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_6f.config(text="")])
+        botao_voltar_menu_6f.pack(pady=30)
+        aplicar_hover(botao_voltar_menu_6f, hover, botao2)
+
+        self.texto_status_6f = Label(self, text="", bg=fundo, font=("Arial", 15, "bold"))
+        self.texto_status_6f.pack(pady=20)
+  
+        Label(self, image=self.controller.logo_tk).pack(pady=(100, 10))
+
+    def corrigir_6f(self):
+
+        try:
+            erro_6f(self.controller.ip_caixa)
+            self.texto_status_6f.config(text="Efetuado a sequência de correção para o 6F\n\nAcesse o SQL do caixa e anexe\no banco 'PDV.mdf' manualmente", fg=verde)
+        except:
+            self.texto_status_6f.config(text="ERRO ao executar o script, verificar problema.", fg=vermelho)
 
 #########################################################################################
 
