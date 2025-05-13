@@ -12,13 +12,14 @@ class Aplicacao(Tk):
     def __init__(self):
         Tk.__init__(self)
         self.title("ExecFlow")
-        self.geometry("600x750")
+        self.iconbitmap("style/EFico.ico")
+        self.geometry("400x500")
         self.configure(bg=fundo)
 
         self.filial = ""
 
         logo = Image.open("style/EFlogo.png")  # pode ser .jpg, .png etc
-        logo = logo.resize((630,130))  # redimensiona, se quiser
+        logo = logo.resize((420,87))  # redimensiona, se quiser
         self.logo_tk = ImageTk.PhotoImage(logo)
 
         # Container principal
@@ -30,7 +31,7 @@ class Aplicacao(Tk):
                                                                                                
         for T in (Homepage, MenuProblemas, DataHub, AtualizarEstoque, AtualizarBiometria, IntegrarNota, AtualizarVersaoLoja, LimparTemp,                                    #<--LOJA
                   HomepageCaixa, MenuProblemasCaixa, HabilitarCartaoPresente, AtualizarBiometriaCaixa, AtualizarVersaoCaixa, TabelaZeroCaixa,                               #<--CAIXA
-                  ConsultarVendaCaixa, HabilitarVNCCaixa, ErroMount_a, Erro6F):                                                                                                                  #<--CAIXA
+                  ConsultarVendaCaixa, HabilitarVNCCaixa, ErroMount_a, LeituraGravacao):                                                                                                                  #<--CAIXA
             tela = T(container, self)
             self.telas[T] = tela
             tela.grid(row=0, column=0, sticky="nsew")
@@ -58,23 +59,26 @@ class Homepage(Frame):
 
 
         topo_frame = Frame(self, bg=fundo)
-        topo_frame.pack(pady=(100,10))
+        topo_frame.pack(pady=(90,10))
 
-        Label(topo_frame, text="Informe o número da ", fg=cor_texto, bg=fundo, font=("Arial", 20, "bold")).pack(side=LEFT)
-        Label(topo_frame, text="FILIAL", fg=cor_texto, bg=fundo, font=("Arial", 20, "underline", "bold")).pack(side=LEFT)
+        Label(topo_frame, text="Informe o número da ", fg=cor_texto, bg=fundo, font=("Arial", 13, "bold")).pack(side=LEFT)
+        Label(topo_frame, text="FILIAL", fg=cor_texto, bg=fundo, font=("Arial", 13, "underline", "bold")).pack(side=LEFT)
     
 
-        self.entrada = Entry(self, fg='grey', width=30, font=("Arial", 17))
+        self.entrada = Entry(self, fg='grey', width=30, font=("Arial", 11))
         self.entrada.insert(0, 'Digite aqui...')
         self.entrada.bind('<FocusIn>', self.quando_clicar)
-        self.entrada.pack(pady=20)
+        self.entrada.pack(pady=13)
 
-        self.botao_menu_loja = Button(self, text="Menu LOJA", width=15, height=1, bg=botao1, fg="#ffffff", bd=4, relief="ridge", font=("Arial", 14), command=lambda: self.conectar_banco_loja()).pack(pady=10)
-        self.botao_menu_caixa = Button(self, text="Menu CAIXA", width=15, height=1, bg=botao1, fg="#ffffff", bd=4, relief="ridge", font=("Arial", 14), command=lambda: self.conectar_banco_caixa()).pack(pady=10)
+        self.botao_menu_loja = Button(self, text="Menu LOJA", width=15, height=1, bg=botao1, fg="#ffffff", bd=4, relief="ridge", font=("Arial", 10), command=lambda: self.conectar_banco_loja()).pack(pady=10)
+        self.botao_menu_caixa = Button(self, text="Menu CAIXA", width=15, height=1, bg=botao1, fg="#ffffff", bd=4, relief="ridge", font=("Arial", 10), command=lambda: self.conectar_banco_caixa()).pack(pady=10)
+
+        self.texto_erro_selecionar_filial = Label(self, text="", fg=vermelho, bg=fundo, font=("Arial", 13, "bold"))
+        self.texto_erro_selecionar_filial.pack(pady=10, padx=40)
 
         aplicar_hover_em_todos(self, hover, botao1)
                
-        Label(self, image=self.controller.logo_tk).pack(pady=(100, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(70, 10))
 
     def confirmar_filial(self):
         filial_digitada = self.entrada.get()
@@ -95,21 +99,25 @@ class Homepage(Frame):
 
         #ip_loja = 'localhost\SQLEXPRESS'
 
-        if len(ip_loja) > 5:
-            self.controller.conn = pyodbc.connect(
-                f'DRIVER={{ODBC Driver 17 for SQL Server}};'
-                f'SERVER={ip_loja};'
-                f'DATABASE=LOJA;'
-                #'Trusted_Connection=yes;'
-                f'UID={self.controller.usuario_sql};'
-                f'PWD={self.controller.senha_sql};'
-                'Connection Timeout=3;'
-            )
-            print("Conectado com sucesso ao banco!")
-            self.controller.mostrar_tela(MenuProblemas)
-            self.controller.ip = ""
-        else:
-            return
+        try:
+            if len(ip_loja) <= 3 or ip_loja == str('localhost\SQLEXPRESS'):
+                self.controller.conn = pyodbc.connect(
+                    f'DRIVER={{ODBC Driver 17 for SQL Server}};'
+                    f'SERVER={ip_loja};'
+                    f'DATABASE=LOJA;'
+                    #'Trusted_Connection=yes;'
+                    f'UID={self.controller.usuario_sql};'
+                    f'PWD={self.controller.senha_sql};'
+                    'Connection Timeout=3;'
+                )
+                print("Conectado com sucesso ao banco!")
+                self.controller.mostrar_tela(MenuProblemas)
+                self.controller.ip = ""
+            else:
+                self.texto_erro_selecionar_filial.config(text="Número de Filial inválido!")
+                return
+        except:
+            self.texto_erro_selecionar_filial.config(text="Falha na conexão com o banco.")
 
     def conectar_banco_loja(self):
         self.confirmar_filial()
@@ -143,8 +151,8 @@ class MenuProblemas(Frame):
         self.controller = controller
 
         # Widget estático
-        self.texto_menu = Label(self, text="", font=("Arial", 15, "bold"), bg=fundo, fg=cor_texto)
-        self.texto_menu.pack(pady=(60, 30))
+        self.texto_menu = Label(self, text="", font=("Arial", 12, "bold"), bg=fundo, fg=cor_texto)
+        self.texto_menu.pack(pady=(40, 30))
 
         botoes_frame = Frame(self, bg=fundo)
         botoes_frame.pack()
@@ -162,18 +170,18 @@ class MenuProblemas(Frame):
             linha = i // 2
             coluna = i % 2
 
-            Button(botoes_frame, text=texto, width=22, height=3, bg=botao1, fg="white", bd=3, relief="ridge", font=("Arial", 13, "bold"), command=comando).grid(row=linha, column=coluna, padx=20, pady=10, sticky="nsew")
+            Button(botoes_frame, text=texto, width=20, height=2, bg=botao1, fg="white", bd=3, relief="ridge", font=("Arial", 9, "bold"), command=comando).grid(row=linha, column=coluna, padx=10, pady=10, sticky="nsew")
             aplicar_hover_em_todos(botoes_frame, hover, botao1)
 
         #ajuste proporção
         botoes_frame.grid_columnconfigure(0, weight=1)
         botoes_frame.grid_columnconfigure(1, weight=1)
 
-        botao_alterar_filial = Button(self, text="Alterar filial", width=25, height=2, bg=vermelho, fg="white", bd=3, relief="ridge", font=("Arial", 14, "bold"), command=lambda: alterar_filial(self, Homepage))
+        botao_alterar_filial = Button(self, text="Alterar filial", width=25, height=2, bg=vermelho, fg="white", bd=3, relief="ridge", font=("Arial", 10, "bold"), command=lambda: alterar_filial(self, Homepage))
         aplicar_hover(botao_alterar_filial, hover, vermelho)
-        botao_alterar_filial.pack(pady=(30, 10))
+        botao_alterar_filial.pack(pady=(15, 5))
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(60, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(10, 10))
 
     def atualizar(self):
         filial = self.controller.filial
@@ -185,22 +193,22 @@ class DataHub(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_status = Label(self, text="STATUS DO DATAHUB:", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"))
-        self.texto_status.pack(pady=(60, 30))
+        self.texto_status = Label(self, text="STATUS DO DATAHUB:", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold"))
+        self.texto_status.pack(pady=(90, 30))
 
-        botao_habilitar_datahub = Button(self, text="Habilitar DataHub", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.habilitar_db)
+        botao_habilitar_datahub = Button(self, text="Habilitar DataHub", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.habilitar_db)
         botao_habilitar_datahub.pack(pady=10)
         aplicar_hover(botao_habilitar_datahub, hover, verde)
 
-        botao_desabilitar_datahub = Button(self, text="Desabilitar DataHub", width=15, height=1, bg=vermelho, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.desabilitar_db)
+        botao_desabilitar_datahub = Button(self, text="Desabilitar DataHub", width=15, height=1, bg=vermelho, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.desabilitar_db)
         botao_desabilitar_datahub.pack(pady=10)
         aplicar_hover(botao_desabilitar_datahub, hover, vermelho)
 
-        botao_voltar_menu = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_status.config(text="STATUS DO DATAHUB:")])
+        botao_voltar_menu = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_status.config(text="STATUS DO DATAHUB:")])
         botao_voltar_menu.pack(pady=5)
         aplicar_hover(botao_voltar_menu, hover, botao2)
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(150, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(100, 10))
 
     def habilitar_db(self):
         resultado = habilitar_datahub(self.controller.conn)
@@ -219,18 +227,18 @@ class DataHub(Frame):
 #         Frame.__init__(self, parent, bg=fundo)
 #         self.controller = controller
 
-#         self.texto_primary_cheio = Label(self, text="Deseja realizar a limpeza de Log's?", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"))
-#         self.texto_primary_cheio.pack(pady=20)
+#         self.texto_primary_cheio = Label(self, text="Deseja realizar a limpeza de Log's?", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold"))
+#         self.texto_primary_cheio.pack(pady=13)
 
 #         self.texto_primary_confirmacao = Label(self, text="(Digite 'S' no campo para realizar)", bg=fundo, fg=cor_texto, font=("Arial", 9))
 #         self.texto_primary_confirmacao.pack(pady=5)
 
-#         self.confirmar_limpeza = Entry(self, fg='grey', width=30, font=("Arial", 14))
+#         self.confirmar_limpeza = Entry(self, fg='grey', width=30, font=("Arial", 10))
 #         self.confirmar_limpeza.insert(0, "Digite 'S' no campo para realizar...")
 #         self.confirmar_limpeza.bind('<FocusIn>', self.quando_clicar)
-#         self.confirmar_limpeza.pack(pady=20)
+#         self.confirmar_limpeza.pack(pady=13)
 
-#         Button(self, text="Confirmar", width=15, height=1, bg='green', fg="#ffffff", command=self.limpar_log, font=("Arial", 14)).pack(pady=5)
+#         Button(self, text="Confirmar", width=15, height=1, bg='green', fg="#ffffff", command=self.limpar_log, font=("Arial", 10)).pack(pady=5)
 #         Button(self, text="Voltar para Menu", width=15, height=2, bg='#015b90', fg="#ffffff", command=lambda: self.controller.mostrar_tela(MenuProblemas)).pack(pady=5)
 
 #     def limpar_log(self):
@@ -254,26 +262,26 @@ class AtualizarBiometria(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_matricula_titulo = Label(self, text="Informe a matrícula", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
-        self.texto_matricula_titulo.pack(pady=(60,30))
+        self.texto_matricula_titulo = Label(self, text="Informe a matrícula", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
+        self.texto_matricula_titulo.pack(pady=(90,20))
     
-        self.matricula = Entry(self, fg='grey', width=30, font=("Arial", 14))
+        self.matricula = Entry(self, fg='grey', width=30, font=("Arial", 10))
         self.matricula.insert(0, 'Informe a matrícula...')
         self.matricula.bind('<FocusIn>', self.quando_clicar)
-        self.matricula.pack(pady=20)
+        self.matricula.pack(pady=13)
 
-        botao_confirmar = Button(self, text="Confirmar", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.atualizar_bio)
+        botao_confirmar = Button(self, text="Confirmar", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.atualizar_bio)
         botao_confirmar.pack(pady=5)
         aplicar_hover(botao_confirmar, hover, verde)
 
-        botao_voltar_menu = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: self.controller.mostrar_tela(MenuProblemas))
+        botao_voltar_menu = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: self.controller.mostrar_tela(MenuProblemas))
         botao_voltar_menu.pack(pady=5)
         aplicar_hover(botao_voltar_menu, hover, botao2)
 
         self.texto_matricula_infos = Label(self, text="", bg="#ffffff", fg=cor_texto, font=("Arial", 13, "bold"), anchor="center", justify="center")
-        self.texto_matricula_infos.pack(pady=30, fill='x')
+        self.texto_matricula_infos.pack(pady=13, fill='x')
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(50, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(100, 10))
 
     def atualizar_bio(self):
         matricula_digitada = self.matricula.get()
@@ -298,29 +306,29 @@ class IntegrarNota(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_integrar_titulo = Label(self, text="Informe a CHAVE NFE para integração", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"))
-        self.texto_integrar_titulo.pack(pady=(60,30))
+        self.texto_integrar_titulo = Label(self, text="Informe a CHAVE NFE para integração", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold"))
+        self.texto_integrar_titulo.pack(pady=(80,20))
 
-        self.aviso = Label(self, text="EM TESTES", bg=fundo, fg=vermelho, font=("Arial", 20, "bold"))
+        self.aviso = Label(self, text="EM TESTES", bg=fundo, fg=vermelho, font=("Arial", 13, "bold"))
         self.aviso.pack(pady=1)
     
-        self.chave_nfe = Entry(self, fg='grey', width=30, font=("Arial", 14))
+        self.chave_nfe = Entry(self, fg='grey', width=30, font=("Arial", 10))
         self.chave_nfe.insert(0, 'Informe a chave...')
         self.chave_nfe.bind('<FocusIn>', self.quando_clicar)
-        self.chave_nfe.pack(pady=20)
+        self.chave_nfe.pack(pady=13)
 
-        botao_confirmar = Button(self, text="Confirmar", width=15, height=1, bg="green", fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.integrar_nf)
+        botao_confirmar = Button(self, text="Confirmar", width=15, height=1, bg="green", fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.integrar_nf)
         botao_confirmar.pack(pady=5)
         aplicar_hover(botao_confirmar, hover, verde)
 
-        botao_voltar_menu = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_integrar_infos.config(text="", fg='black')])
+        botao_voltar_menu = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_integrar_infos.config(text="", fg='black')])
         botao_voltar_menu.pack(pady=5)
         aplicar_hover(botao_voltar_menu, hover, botao2)
 
         self.texto_integrar_infos = Label(self, text="", bg="#ffffff", fg=cor_texto, font=("Arial", 13, "bold"), anchor="center", justify="center")
-        self.texto_integrar_infos.pack(pady=30, fill='x')
+        self.texto_integrar_infos.pack(pady=13, fill='x')
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(80, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(60, 10))
 
     def integrar_nf(self):
         chave_digitada = self.chave_nfe.get()
@@ -345,20 +353,20 @@ class AtualizarEstoque(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_titulo_estoque = Label(self, text="Atualizar estoque da Filial", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
-        self.texto_titulo_estoque.pack(pady=(60,30))
-        self.texto_resultado_estoque = Label(self, text="", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"))
-        self.texto_resultado_estoque.pack(pady=30)
+        self.texto_titulo_estoque = Label(self, text="Atualizar estoque da Filial", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
+        self.texto_titulo_estoque.pack(pady=(90,20))
+        self.texto_resultado_estoque = Label(self, text="", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold"))
+        self.texto_resultado_estoque.pack(pady=13)
 
-        botao_atualizar = Button(self, text="Atualizar estoque", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.atualizar_estoque_loja)
+        botao_atualizar = Button(self, text="Atualizar estoque", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.atualizar_estoque_loja)
         botao_atualizar.pack(pady=5)
         aplicar_hover(botao_atualizar, hover, verde)
 
-        botao_voltar_menu = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_resultado_estoque.config(text="")])
+        botao_voltar_menu = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_resultado_estoque.config(text="")])
         botao_voltar_menu.pack(pady=5)
         aplicar_hover(botao_voltar_menu, hover, botao2)
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(130, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(90, 7))
 
     def atualizar_estoque_loja(self):
         resultado_atualizacao = atualizar_estoque(self.controller.conn)
@@ -371,42 +379,43 @@ class AtualizarVersaoLoja(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_versao = Label(self, text="Versão atual PREVENDA:", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
-        self.texto_versao.pack(pady=(60,30))
+        self.texto_versao = Label(self, text="Versão atual PREVENDA:", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
+        self.texto_versao.pack(pady=(60,10))
 
-        self.inserir_versao = Entry(self, fg='grey', width=30, font=("Arial", 16))
+        self.inserir_versao = Entry(self, fg='grey', width=30, font=("Arial", 11))
         self.inserir_versao.insert(0, 'Informe a versão...')
         self.inserir_versao.bind('<FocusIn>', self.quando_clicar)
-        self.inserir_versao.pack(pady=(40, 20))
+        self.inserir_versao.pack(pady=(30, 20))
 
-        botao_atualizar = Button(self, text="Atualizar Versão", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.atualiza_versao)
+        botao_atualizar = Button(self, text="Atualizar Versão", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.atualiza_versao)
         botao_atualizar.pack(pady=5)
         aplicar_hover(botao_atualizar, hover, verde)
 
-        botao_consultar = Button(self, text="Consultar Versão", width=15, height=1, bg=botao1, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.consulta_de_versao)
+        botao_consultar = Button(self, text="Consultar Versão", width=15, height=1, bg=botao1, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.consulta_de_versao)
         botao_consultar.pack(pady=5)
         aplicar_hover(botao_consultar, hover, botao1)
 
-        botao_voltar_menu_versao = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_versao.config(text="Versão atual:")])
+        botao_voltar_menu_versao = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_versao.config(text="Versão atual:")])
         botao_voltar_menu_versao.pack(pady=5)
         aplicar_hover(botao_voltar_menu_versao, hover, botao2)
 
-        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: 3.0.0.281            \nPREVENDA: 1.102.081", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"), bd=2, relief="solid")
-        self.info_versao.pack(pady=30)
+        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: 3.0.0.281            \nPREVENDA: 1.102.081", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold"), bd=2, relief="solid")
+        self.info_versao.pack(pady=13)
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(80, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
 
     def consulta_de_versao(self):
         resultado_versao = consultar_versao(self.controller.conn)
-        self.texto_versao.config(text=f"Versão atual PREVENDA {resultado_versao}")
+        self.texto_versao.config(text=f"Versão atual PREVENDA: {resultado_versao}")
     
     def atualiza_versao(self):
         versao_digitada = self.inserir_versao.get()
         self.inserir_versao.delete(0, END)
 
         if len(versao_digitada) > 6:
-            resultado_atualizacao = atualizar_versao(self.controller.conn, versao_digitada)
-            self.texto_versao.config(text=f"Versão atual PREVENDA {resultado_atualizacao}")
+            atualizar_versao(self.controller.conn, versao_digitada)
+            resultado_versao = consultar_versao(self.controller.conn)
+            self.texto_versao.config(text=f"Versão atual PREVENDA: {resultado_versao}")
         else:
             return
 
@@ -422,26 +431,26 @@ class LimparTemp(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_informar_ip = Label(self, text="Informe o IP do terminal", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
-        self.texto_informar_ip.pack(pady=(60,30))
+        self.texto_informar_ip = Label(self, text="Informe o IP do terminal\npara limpar a %Temp%", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
+        self.texto_informar_ip.pack(pady=(70,20))
 
-        self.aviso = Label(self, text="EM CONSTRUÇÃO", bg=fundo, fg=vermelho, font=("Arial", 20, "bold"))
-        self.aviso.pack(pady=30)
+        self.aviso = Label(self, text="EM CONSTRUÇÃO", bg=fundo, fg=vermelho, font=("Arial", 13, "bold"))
+        self.aviso.pack(pady=13)
     
-        self.entry_ip = Entry(self, fg='grey', width=30, font=("Arial", 14))
+        self.entry_ip = Entry(self, fg='grey', width=30, font=("Arial", 10))
         self.entry_ip.insert(0, 'Informe o IP...')
         self.entry_ip.bind('<FocusIn>', self.quando_clicar)
-        self.entry_ip.pack(pady=20)
+        self.entry_ip.pack(pady=13)
 
-        #Button(self, text="Limpar %Temp%", width=15, height=1, bg="green", fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.limpar_temp).pack(pady=5)
-        botao_voltar_menu = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: self.controller.mostrar_tela(MenuProblemas))
+        #Button(self, text="Limpar %Temp%", width=15, height=1, bg="green", fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.limpar_temp).pack(pady=5)
+        botao_voltar_menu = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: self.controller.mostrar_tela(MenuProblemas))
         botao_voltar_menu.pack(pady=5)
         aplicar_hover(botao_voltar_menu, hover, botao2)
 
         self.texto_limpeza_status = Label(self, text="", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"), anchor="center", justify="center")
-        self.texto_limpeza_status.pack(pady=30, fill='x')
+        self.texto_limpeza_status.pack(pady=13, fill='x')
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(90, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(70, 10))
 
     def limpar_temp(self):
         ip_digitado = self.entry_ip.get()
@@ -475,26 +484,26 @@ class HomepageCaixa(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_selecionar_caixa = Label(self, text="Qual CAIXA será feita a conexão?", fg=cor_texto, bg=fundo, font=("Arial", 20, "bold"))
-        self.texto_selecionar_caixa.pack(pady=(100,30), padx=40)
+        self.texto_selecionar_caixa = Label(self, text="Qual CAIXA será feita a conexão?", fg=cor_texto, bg=fundo, font=("Arial", 13, "bold"))
+        self.texto_selecionar_caixa.pack(pady=(90,30), padx=40)
 
-        self.entrada = Entry(self, fg='grey', width=30, font=("Arial", 17))
+        self.entrada = Entry(self, fg='grey', width=30, font=("Arial", 11))
         self.entrada.insert(0, 'Digite aqui...')
         self.entrada.bind('<FocusIn>', self.quando_clicar)
-        self.entrada.pack(pady=20)
+        self.entrada.pack(pady=13)
 
-        botao_confirmar_caixa = Button(self, text="Confirmar", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=lambda: self.confirmar_caixa())
+        botao_confirmar_caixa = Button(self, text="Confirmar", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=lambda: self.confirmar_caixa())
         botao_confirmar_caixa.pack(pady=5)
         aplicar_hover(botao_confirmar_caixa, hover, verde)
 
-        botao_alterar_filial = Button(self, text="Alterar filial", width=15, height=1, bg=botao2, fg='#ffffff', bd=3, relief="ridge", font=("Arial", 14),command=lambda: self.controller.mostrar_tela(Homepage))
+        botao_alterar_filial = Button(self, text="Alterar filial", width=15, height=1, bg=botao2, fg='#ffffff', bd=3, relief="ridge", font=("Arial", 10),command=lambda: self.controller.mostrar_tela(Homepage))
         botao_alterar_filial.pack(pady=5)
         aplicar_hover(botao_alterar_filial, hover, vermelho)
 
-        self.texto_erro_selecionar_caixa = Label(self, text="", fg=vermelho, bg=fundo, font=("Arial", 20, "bold"))
-        self.texto_erro_selecionar_caixa.pack(pady=30, padx=40)
+        self.texto_erro_selecionar_caixa = Label(self, text="", fg=vermelho, bg=fundo, font=("Arial", 13, "bold"))
+        self.texto_erro_selecionar_caixa.pack(pady=13, padx=40)
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(60, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(70, 10))
 
     def confirmar_caixa(self):
         self.controller.caixa_selecionado = self.entrada.get()
@@ -509,7 +518,7 @@ class HomepageCaixa(Frame):
         #self.controller.ip_caixa = 'localhost\SQLEXPRESS'
 
         try:
-            if len(self.controller.caixa_selecionado) < 2 or self.controller.caixa_selecionado == None:
+            if len(self.controller.caixa_selecionado) < 2 and self.controller.caixa_selecionado != None:
                 self.controller.conn = pyodbc.connect(
                     f'DRIVER={{ODBC Driver 17 for SQL Server}};'
                     f'SERVER={self.controller.ip_caixa};'
@@ -540,8 +549,8 @@ class MenuProblemasCaixa(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_menu = Label(self, text="", font=("Arial", 15, "bold"), bg=fundo, fg=cor_texto)
-        self.texto_menu.pack(pady=(50, 30))
+        self.texto_menu = Label(self, text="", font=("Arial", 10, "bold"), bg=fundo, fg=cor_texto)
+        self.texto_menu.pack(pady=(40, 10))
 
         botoes_frame = Frame(self, bg=fundo)
         botoes_frame.pack()
@@ -554,31 +563,31 @@ class MenuProblemasCaixa(Frame):
             ("Verificar Vendas", lambda: self.controller.mostrar_tela(ConsultarVendaCaixa)),
             ("Habilitar VNC", lambda: self.controller.mostrar_tela(HabilitarVNCCaixa)),
             ("Mount -a", lambda: self.controller.mostrar_tela(ErroMount_a)),
-            ("Correção 6F", lambda: self.controller.mostrar_tela(Erro6F)),
+            ("Leitura e Gravação", lambda: self.controller.mostrar_tela(LeituraGravacao)),
         ]
 
         for i, (texto, comando) in enumerate(botoes):
             linha = i // 2
             coluna = i % 2
 
-            Button(botoes_frame, text=texto, width=20, height=2, bg=botao1, fg="white", bd=3, relief="ridge", font=("Arial", 12, "bold"), command=comando).grid(row=linha, column=coluna, padx=20, pady=10, sticky="nsew")
+            Button(botoes_frame, text=texto, width=20, height=2, bg=botao1, fg="white", bd=3, relief="ridge", font=("Arial", 8, "bold"), command=comando).grid(row=linha, column=coluna, padx=13, pady=6, sticky="nsew")
             aplicar_hover_em_todos(botoes_frame, hover, botao1)
         #ajuste proporção
         botoes_frame.grid_columnconfigure(0, weight=1)
         botoes_frame.grid_columnconfigure(1, weight=1)
 
         frame_alteracoes = Frame(self, bg=fundo)
-        frame_alteracoes.pack(pady=(20, 10))
+        frame_alteracoes.pack(pady=(13, 6))
 
-        botao_alterar_filial = Button(frame_alteracoes, text="Alterar filial", width=21, height=3, bg=vermelho, fg="white", bd=3, relief="ridge", font=("Arial", 13, "bold"), command=lambda: alterar_filial(self, Homepage))
+        botao_alterar_filial = Button(frame_alteracoes, text="Alterar filial", width=21, height=3, bg=vermelho, fg="white", bd=3, relief="ridge", font=("Arial", 9, "bold"), command=lambda: alterar_filial(self, Homepage))
         aplicar_hover(botao_alterar_filial, hover, vermelho)
-        botao_alterar_filial.pack(side="left", padx=10)
+        botao_alterar_filial.pack(side="left", padx=6)
 
-        botao_alterar_caixa = Button(frame_alteracoes, text="Alterar caixa", width=21, height=3, bg=vermelho, fg="white", bd=3, relief="ridge", font=("Arial", 13, "bold"), command=lambda: self.controller.mostrar_tela(HomepageCaixa))
+        botao_alterar_caixa = Button(frame_alteracoes, text="Alterar caixa", width=21, height=3, bg=vermelho, fg="white", bd=3, relief="ridge", font=("Arial", 9, "bold"), command=lambda: self.controller.mostrar_tela(HomepageCaixa))
         aplicar_hover(botao_alterar_caixa, hover, vermelho)
-        botao_alterar_caixa.pack(side="left", padx=10)
+        botao_alterar_caixa.pack(side="left", padx=6)
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(5, 20))
         
     def atualizar(self):
         filial = self.controller.filial
@@ -594,18 +603,18 @@ class MenuProblemasCaixa(Frame):
 #         Frame.__init__(self, parent, bg=fundo)
 #         self.controller = controller
 
-#         self.texto_limpeza_caixa = Label(self, text="Deseja realizar a limpeza de Log's?", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"))
-#         self.texto_limpeza_caixa.pack(pady=20)
+#         self.texto_limpeza_caixa = Label(self, text="Deseja realizar a limpeza de Log's?", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold"))
+#         self.texto_limpeza_caixa.pack(pady=13)
 
 #         self.texto_limpeza_confirmacao = Label(self, text="(Digite 'S' no campo para realizar)", bg=fundo, fg=cor_texto, font=("Arial", 9))
 #         self.texto_limpeza_confirmacao.pack(pady=5)
 
-#         self.confirmar_limpeza = Entry(self, fg='grey', width=30, font=("Arial", 14))
+#         self.confirmar_limpeza = Entry(self, fg='grey', width=30, font=("Arial", 10))
 #         self.confirmar_limpeza.insert(0, "Digite 'S' no campo para realizar...")
 #         self.confirmar_limpeza.bind('<FocusIn>', self.quando_clicar)
-#         self.confirmar_limpeza.pack(pady=20)
+#         self.confirmar_limpeza.pack(pady=13)
 
-#         Button(self, text="Confirmar", width=15, height=1, bg='green', fg="#ffffff", command=self.limpar_caixar, font=("Arial", 14)).pack(pady=5)
+#         Button(self, text="Confirmar", width=15, height=1, bg='green', fg="#ffffff", command=self.limpar_caixar, font=("Arial", 10)).pack(pady=5)
 #         Button(self, text="Voltar para Menu", width=15, height=2, bg='#015b90', fg="#ffffff", command=lambda: self.controller.mostrar_tela(MenuProblemas_caixa)).pack(pady=5)
 
 #     def limpar_caixar(self):
@@ -629,20 +638,20 @@ class HabilitarCartaoPresente(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_titulo_habilitar = Label(self, text="HABILITAR CARTÃO PRESENTE", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
-        self.texto_titulo_habilitar.pack(pady=(60,30))
-        self.texto_status_cartao = Label(self, text="", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"))
-        self.texto_status_cartao.pack(pady=30)
+        self.texto_titulo_habilitar = Label(self, text="HABILITAR CARTÃO PRESENTE", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
+        self.texto_titulo_habilitar.pack(pady=(90,20))
+        self.texto_status_cartao = Label(self, text="", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold"))
+        self.texto_status_cartao.pack(pady=13)
 
-        botao_habilitar_venda = Button(self, text="Habilitar Venda", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.habilitar_cartao_presente)
+        botao_habilitar_venda = Button(self, text="Habilitar Venda", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.habilitar_cartao_presente)
         botao_habilitar_venda.pack(pady=5)
         aplicar_hover(botao_habilitar_venda, hover, verde)
         
-        botao_voltar_menu_cartao = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_cartao.config(text="")])
+        botao_voltar_menu_cartao = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_cartao.config(text="")])
         botao_voltar_menu_cartao.pack(pady=5)
         aplicar_hover(botao_voltar_menu_cartao, hover, botao2)
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(80, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(100, 10))
 
     def habilitar_cartao_presente(self):
         resultado_habilitar = habilitar_cartao_presente_caixa(self.controller.conn)
@@ -655,22 +664,22 @@ class AtualizarBiometriaCaixa(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_titulo_bio_caixa = Label(self, text="Atualização de Biometrias no CAIXA", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
-        self.texto_titulo_bio_caixa.pack(pady=(60,5))
-        self.texto_aviso_bio = Label(self, text="| Utilizar este menu após ter atualizado no menu LOJA |", bg=fundo, fg=botao1, font=("Arial", 13, "bold"), bd=1, relief="solid")
+        self.texto_titulo_bio_caixa = Label(self, text="Atualização de Biometrias no CAIXA", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
+        self.texto_titulo_bio_caixa.pack(pady=(90,5))
+        self.texto_aviso_bio = Label(self, text="| Utilizar este menu após ter atualizado no menu LOJA |", bg=fundo, fg=botao1, font=("Arial", 9, "bold"), bd=1, relief="solid")
         self.texto_aviso_bio.pack(pady=15)
-        self.texto_status_truncate = Label(self, text="", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"))
-        self.texto_status_truncate.pack(pady=30)
+        self.texto_status_truncate = Label(self, text="", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold"))
+        self.texto_status_truncate.pack(pady=13)
 
-        botao_atualizar_bio = Button(self, text="Atualizar Biometrias", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.atualizar_bio_caixa)
+        botao_atualizar_bio = Button(self, text="Atualizar Biometrias", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.atualizar_bio_caixa)
         botao_atualizar_bio.pack(pady=5)
         aplicar_hover(botao_atualizar_bio, hover, verde)
 
-        botao_voltar_menu_bio = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_truncate.config(text="")])
-        botao_voltar_menu_bio.pack(pady=30)
+        botao_voltar_menu_bio = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_truncate.config(text="")])
+        botao_voltar_menu_bio.pack(pady=13)
         aplicar_hover(botao_voltar_menu_bio, hover, botao2)
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(70, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(90, 10))
 
     def atualizar_bio_caixa(self):
         resultado_truncate = atualizar_biometria_caixa(self.controller.conn)
@@ -683,42 +692,43 @@ class AtualizarVersaoCaixa(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_versao = Label(self, text="Versão atual PDV:", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
-        self.texto_versao.pack(pady=(60,30))
+        self.texto_versao = Label(self, text="Versão atual do PDV:", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
+        self.texto_versao.pack(pady=(60,10))
 
-        self.inserir_versao = Entry(self, fg='grey', width=30, font=("Arial", 16))
+        self.inserir_versao = Entry(self, fg='grey', width=30, font=("Arial", 11))
         self.inserir_versao.insert(0, 'Informe a versão...')
         self.inserir_versao.bind('<FocusIn>', self.quando_clicar)
-        self.inserir_versao.pack(pady=(40, 20))
+        self.inserir_versao.pack(pady=(30, 20))
 
-        botao_atualizar_caixa = Button(self, text="Atualizar Versão", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.atualiza_versao)
+        botao_atualizar_caixa = Button(self, text="Atualizar Versão", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.atualiza_versao)
         botao_atualizar_caixa.pack(pady=5)
         aplicar_hover(botao_atualizar_caixa, hover, verde)
 
-        botao_consultar_versao_caixa = Button(self, text="Consultar Versão", width=15, height=1, bg=botao1, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.consulta_de_versao)
+        botao_consultar_versao_caixa = Button(self, text="Consultar Versão", width=15, height=1, bg=botao1, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.consulta_de_versao)
         botao_consultar_versao_caixa.pack(pady=5)
         aplicar_hover(botao_consultar_versao_caixa, hover, botao1)
 
-        botao_voltar_menu_versao = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_versao.config(text="Versão atual:")])
+        botao_voltar_menu_versao = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_versao.config(text="Versão atual:")])
         botao_voltar_menu_versao.pack(pady=5)
         aplicar_hover(botao_voltar_menu_versao, hover, botao2)
 
-        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: 3.0.0.281             \nPREVENDA: 1.102.081", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"), bd=2, relief="solid")
-        self.info_versao.pack(pady=30)
+        self.info_versao = Label(self, text="| Versões que utilizamos atualmente |\n\nPDV: 3.0.0.281             \nPREVENDA: 1.102.081", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold"), bd=2, relief="solid")
+        self.info_versao.pack(pady=10)
 
         
-        Label(self, image=self.controller.logo_tk).pack(pady=(60, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
 
     def consulta_de_versao(self):
         resultado_versao = consultar_versao(self.controller.conn)
-        self.texto_versao.config(text=f"Versão atual PDV {resultado_versao}")
+        self.texto_versao.config(text=f"Versão atual PDV: {resultado_versao}")
     
     def atualiza_versao(self):
         versao_digitada = self.inserir_versao.get()
         self.inserir_versao.delete(0, END)
 
-        resultado_atualizacao = atualizar_versao(self.controller.conn, versao_digitada)
-        self.texto_versao.config(text=f"Versão atual PDV {resultado_atualizacao}")
+        atualizar_versao(self.controller.conn, versao_digitada)
+        resultado_versao = consultar_versao(self.controller.conn)
+        self.texto_versao.config(text=f"Versão atual PDV: {resultado_versao}")
 
     def quando_clicar(self, event):
         if self.inserir_versao.get() == 'Informe a versão...':
@@ -732,20 +742,20 @@ class TabelaZeroCaixa(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_titulo_tabelazero = Label(self, text="Corrigir PDV com TABELA 0", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
-        self.texto_titulo_tabelazero.pack(pady=(60,30))
-        self.texto_status_tabelazero = Label(self, text="", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"))
-        self.texto_status_tabelazero.pack(pady=30)
+        self.texto_titulo_tabelazero = Label(self, text="Corrigir PDV com TABELA 0", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
+        self.texto_titulo_tabelazero.pack(pady=(90,20))
+        self.texto_status_tabelazero = Label(self, text="", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold"))
+        self.texto_status_tabelazero.pack(pady=13)
 
-        botao_executar_usp = Button(self, text="Executar USP", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.corrigir_tabela_zero)
+        botao_executar_usp = Button(self, text="Executar USP", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.corrigir_tabela_zero)
         botao_executar_usp.pack(pady=5)
         aplicar_hover(botao_executar_usp, hover, verde)
 
-        botao_voltar_menu_tabela = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_tabelazero.config(text="")])
-        botao_voltar_menu_tabela.pack(pady=30)
+        botao_voltar_menu_tabela = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_tabelazero.config(text="")])
+        botao_voltar_menu_tabela.pack(pady=13)
         aplicar_hover(botao_voltar_menu_tabela, hover, botao2)
         
-        Label(self, image=self.controller.logo_tk).pack(pady=(70, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(100, 10))
 
     def corrigir_tabela_zero(self):
         resultado_tabela = tabela_zero_caixa(self.controller.conn)
@@ -758,38 +768,44 @@ class ConsultarVendaCaixa(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.titulo_consulta = Label(self, text="Consulta de vendas no Caixa", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
-        self.titulo_consulta.pack(pady=(50,15))
+        self.titulo_consulta = Label(self, text="Consulta de vendas no Caixa", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
+        self.titulo_consulta.pack(pady=(30,5))
 
-        self.titulo_consulta = Label(self, text="Utilize a parametrização DD/MM/AAAA e 9.99", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold", "underline"))
-        self.titulo_consulta.pack(pady=10)
+        self.titulo_consulta = Label(self, text="Utilize a parametrização", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold", "underline"))
+        self.titulo_consulta.pack(pady=5)
 
-        self.inserir_data = Entry(self, fg='grey', width=30, font=("Arial", 15))
+        self.titulo_consulta = Label(self, text="Data: DD/MM/AAAA", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold", "underline"))
+        self.titulo_consulta.pack(padx=(0,120), pady=0)
+
+        self.inserir_data = Entry(self, fg='grey', width=30, font=("Arial", 11))
         self.inserir_data.insert(0, 'Informe a data...')
         self.inserir_data.bind('<FocusIn>', self.quando_clicar)
-        self.inserir_data.pack(pady=(5, 1))
+        self.inserir_data.pack(pady=(1, 1))
 
-        self.titulo_consulta = Label(self, text="&", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"))
-        self.titulo_consulta.pack(pady=1)
+        self.titulo_consulta = Label(self, text="&", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold"))
+        self.titulo_consulta.pack(pady=0)
 
-        self.inserir_valor = Entry(self, fg='grey', width=30, font=("Arial", 15))
+        self.inserir_valor = Entry(self, fg='grey', width=30, font=("Arial", 11))
         self.inserir_valor.insert(0, 'Informe o Valor, Ex: 9.99')
         self.inserir_valor.bind('<FocusIn>', self.quando_clicar)
-        self.inserir_valor.pack(pady=(1, 10))
+        self.inserir_valor.pack(pady=(1, 1))
 
-        self.erro_preenchimento = Label(self, text="", bg=fundo, fg=cor_texto, font=("Arial", 15, "bold"), anchor="center", justify="center")
-        self.erro_preenchimento.pack(pady=5, fill='x')
+        self.titulo_consulta = Label(self, text="Valor: 9.99", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold", "underline"))
+        self.titulo_consulta.pack(padx=(0,175), pady=0)
 
-        botao_consultar_venda = Button(self, text="Consultar Venda", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.consultar_vendas)
-        botao_consultar_venda.pack(pady=5)
+        self.erro_preenchimento = Label(self, text="", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold"), anchor="center", justify="center")
+        self.erro_preenchimento.pack(pady=3, fill='x')
+
+        botao_consultar_venda = Button(self, text="Consultar Venda", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.consultar_vendas)
+        botao_consultar_venda.pack(pady=3)
         aplicar_hover(botao_consultar_venda, hover, verde)
 
-        botao_voltar_menu_consulta = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.erro_preenchimento.config(text="", fg="black")])
-        botao_voltar_menu_consulta.pack(pady=(5,20))
+        botao_voltar_menu_consulta = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.erro_preenchimento.config(text="", fg="black")])
+        botao_voltar_menu_consulta.pack(pady=(5,5))
         aplicar_hover(botao_voltar_menu_consulta, hover, botao2)
 
         frame_historico = Frame(self)
-        frame_historico.pack(pady=(15,5), padx=10, fill="x")
+        frame_historico.pack(pady=(5,5), padx=10, fill="x")
 
         self.historico_vendas_aprovadas = Label(frame_historico, text="", bg=verde, fg=cor_texto, font=("Arial", 10, "bold"), anchor="center", justify="center")
         self.historico_vendas_aprovadas.pack(side="left", expand=True, fill='both')
@@ -833,19 +849,19 @@ class HabilitarVNCCaixa(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_titulo_habilitar = Label(self, text="Habilitar conexão VNC no Caixa", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
-        self.texto_titulo_habilitar.pack(pady=(60,30))
+        self.texto_titulo_habilitar = Label(self, text="Habilitar conexão VNC no Caixa", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
+        self.texto_titulo_habilitar.pack(pady=(90,20))
 
-        botao_habilitar_vnc = Button(self, text="Habilitar VNC", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.habilitar_vnc)
+        botao_habilitar_vnc = Button(self, text="Habilitar VNC", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.habilitar_vnc)
         botao_habilitar_vnc.pack(pady=5)
         aplicar_hover(botao_habilitar_vnc, hover, verde)
 
-        botao_voltar_menu_vnc = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_vnc.config(text="")])
-        botao_voltar_menu_vnc.pack(pady=20)
+        botao_voltar_menu_vnc = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_vnc.config(text="")])
+        botao_voltar_menu_vnc.pack(pady=13)
         aplicar_hover(botao_voltar_menu_vnc, hover, botao2)
 
-        self.texto_status_vnc = Label(self, text="", bg=fundo, font=("Arial", 15, "bold"))
-        self.texto_status_vnc.pack(pady=20)
+        self.texto_status_vnc = Label(self, text="", bg=fundo, font=("Arial", 11, "bold"))
+        self.texto_status_vnc.pack(pady=13)
   
         Label(self, image=self.controller.logo_tk).pack(pady=(100, 10))
 
@@ -864,19 +880,19 @@ class ErroMount_a(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_mount = Label(self, text="Erro de diretório PBM\n(Mount -a)", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
-        self.texto_mount.pack(pady=(60,30))
+        self.texto_mount = Label(self, text="Erro de diretório PBM\n(Mount -a)", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
+        self.texto_mount.pack(pady=(90,20))
 
-        botao_mount = Button(self, text="Corrigir", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.corrigir_mount_a)
+        botao_mount = Button(self, text="Corrigir", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.corrigir_mount_a)
         botao_mount.pack(pady=5)
         aplicar_hover(botao_mount, hover, verde)
 
-        botao_voltar_menu_mount = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_mount.config(text="")])
-        botao_voltar_menu_mount.pack(pady=30)
+        botao_voltar_menu_mount = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_mount.config(text="")])
+        botao_voltar_menu_mount.pack(pady=13)
         aplicar_hover(botao_voltar_menu_mount, hover, botao2)
 
-        self.texto_status_mount = Label(self, text="", bg=fundo, font=("Arial", 15, "bold"))
-        self.texto_status_mount.pack(pady=20)
+        self.texto_status_mount = Label(self, text="", bg=fundo, font=("Arial", 10, "bold"))
+        self.texto_status_mount.pack(pady=13)
 
         
         Label(self, image=self.controller.logo_tk).pack(pady=(100, 10))
@@ -891,34 +907,34 @@ class ErroMount_a(Frame):
 
 #########################################################################################
 
-class Erro6F(Frame):
+class LeituraGravacao(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_6f = Label(self, text="Erro de 6F no PDV", bg=fundo, fg=cor_texto, font=("Arial", 20, "bold"))
-        self.texto_6f.pack(pady=(60,30))
+        self.texto_permissao = Label(self, text="Ativar permissões no PDV\nLeitura e Gravação", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
+        self.texto_permissao.pack(pady=(70,20))
 
-        botao_6f = Button(self, text="Corrigir", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 14), command=self.corrigir_6f)
-        botao_6f.pack(pady=5)
-        aplicar_hover(botao_6f, hover, verde)
+        botao_permissao = Button(self, text="Ativar", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.ativar_permissao)
+        botao_permissao.pack(pady=5)
+        aplicar_hover(botao_permissao, hover, verde)
 
-        botao_voltar_menu_6f = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 16), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_6f.config(text="")])
-        botao_voltar_menu_6f.pack(pady=30)
-        aplicar_hover(botao_voltar_menu_6f, hover, botao2)
+        botao_voltar_menu_permissao = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_permissao.config(text="")])
+        botao_voltar_menu_permissao.pack(pady=13)
+        aplicar_hover(botao_voltar_menu_permissao, hover, botao2)
 
-        self.texto_status_6f = Label(self, text="", bg=fundo, font=("Arial", 15, "bold"))
-        self.texto_status_6f.pack(pady=20)
+        self.texto_status_permissao = Label(self, text="", bg=fundo, font=("Arial", 10, "bold"))
+        self.texto_status_permissao.pack(pady=10)
   
-        Label(self, image=self.controller.logo_tk).pack(pady=(100, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(90, 10))
 
-    def corrigir_6f(self):
+    def ativar_permissao(self):
 
         try:
-            erro_6f(self.controller.ip_caixa)
-            self.texto_status_6f.config(text="Efetuado a sequência de correção para o 6F\n\nAcesse o SQL do caixa e anexe\no banco 'PDV.mdf' manualmente", fg=verde)
+            leitura_gravação(self.controller.ip_caixa)
+            self.texto_status_permissao.config(text="Ativado as permissões no caixa\n\nLeitura e Gravação ✓ ", fg=verde)
         except:
-            self.texto_status_6f.config(text="ERRO ao executar o script, verificar problema.", fg=vermelho)
+            self.texto_status_permissao.config(text="ERRO ao executar o script, verificar problema no PDV.", fg=vermelho)
 
 #########################################################################################
 

@@ -238,4 +238,32 @@ def erro_6f(ip_servidor):
 
 # --------------------------------------------------------------------------------
 
+def leitura_gravação(ip_servidor):
+
+    try:
+        cliente_ssh = paramiko.SSHClient()
+        cliente_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Ignora a verificação de chave do host
+        cliente_ssh.connect(ip_servidor, username=usuario_linux, password=senha_linux)
+
+        # Abre um shell
+        shell = cliente_ssh.invoke_shell()
+        time.sleep(1)
+
+        shell.send('su root\n')
+        time.sleep(1)
+
+        shell.send(senha_root + '\n')
+        time.sleep(2)
+
+        # Inicia o serviço VNC
+        shell.send('sudo find /opt/pdv/ -exec chmod a+rwx {} \;\n')
+        time.sleep(2)
+
+    except Exception as e:
+        return f"Erro ao conectar ou executar o comando: \n\n{e}"
+    finally:
+        cliente_ssh.close()
+
+# --------------------------------------------------------------------------------
+
 # conn.close()
