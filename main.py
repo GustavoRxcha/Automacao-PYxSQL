@@ -100,7 +100,7 @@ class Homepage(Frame):
         #ip_loja = 'localhost\SQLEXPRESS'
 
         try:
-            if len(ip_loja) <= 3 or ip_loja == str('localhost\SQLEXPRESS'):
+
                 self.controller.conn = pyodbc.connect(
                     f'DRIVER={{ODBC Driver 17 for SQL Server}};'
                     f'SERVER={ip_loja};'
@@ -113,11 +113,10 @@ class Homepage(Frame):
                 print("Conectado com sucesso ao banco!")
                 self.controller.mostrar_tela(MenuProblemas)
                 self.controller.ip = ""
-            else:
-                self.texto_erro_selecionar_filial.config(text="Número de Filial inválido!")
+            except:
+                self.texto_erro_selecionar_filial.config(text="Falha na conexão")
                 return
-        except:
-            self.texto_erro_selecionar_filial.config(text="Falha na conexão com o banco.")
+
 
     def conectar_banco_loja(self):
         self.confirmar_filial()

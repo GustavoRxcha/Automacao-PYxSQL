@@ -73,7 +73,7 @@ def limpar_temp_remoto(ip_maquina_remota):
         print(f"Erro ao executar PsExec: {e}")
 
 
-limpar_temp_remoto('192.168.153.52')
+#limpar_temp_remoto('192.168.153.52')
 
 ################################################################################################
 
@@ -137,4 +137,4 @@ def erro_6f(ip_servidor):
     finally:
         cliente_ssh.close()
 
-#erro_6f('10.17.196.3')
+#erro_6f('10.17.235.1')
