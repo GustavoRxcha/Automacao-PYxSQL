@@ -138,3 +138,39 @@ def erro_6f(ip_servidor):
         cliente_ssh.close()
 
 #erro_6f('10.17.235.1')
+
+######################################################################################################################
+
+def leitura_gravação(ip_servidor):
+
+    usuario = 'suporte'
+    senha = 'F@RM4C1A'
+    senha_root = 'F@RM4C1A'
+
+    try:
+        cliente_ssh = paramiko.SSHClient()
+        cliente_ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # Ignora a verificação de chave do host
+        cliente_ssh.connect(ip_servidor, username=usuario, password=senha)
+
+        # Abre um shell
+        shell = cliente_ssh.invoke_shell()
+        time.sleep(1)
+
+        shell.send('su root\n')
+        time.sleep(1)
+
+        shell.send(senha_root + '\n')
+        time.sleep(2)
+
+        shell.send('chmod -R a+rwx /opt/pdv/\n')
+        time.sleep(2)
+
+        output = shell.recv(9999).decode('utf-8')
+        print("Saída do terminal:\n", output)
+
+    except Exception as e:
+        return f"Erro ao conectar ou executar o comando: \n\n{e}"
+    finally:
+        cliente_ssh.close()
+
+leitura_gravação('10.16.4.2')

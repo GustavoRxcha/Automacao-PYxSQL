@@ -113,9 +113,9 @@ class Homepage(Frame):
                 print("Conectado com sucesso ao banco!")
                 self.controller.mostrar_tela(MenuProblemas)
                 self.controller.ip = ""
-            except:
-                self.texto_erro_selecionar_filial.config(text="Falha na conexão")
-                return
+        except:
+            self.texto_erro_selecionar_filial.config(text="Falha na conexão")
+            return
 
 
     def conectar_banco_loja(self):
