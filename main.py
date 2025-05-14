@@ -262,7 +262,7 @@ class AtualizarBiometria(Frame):
         self.controller = controller
 
         self.texto_matricula_titulo = Label(self, text="Informe a matrícula", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
-        self.texto_matricula_titulo.pack(pady=(90,20))
+        self.texto_matricula_titulo.pack(pady=(40,20))
     
         self.matricula = Entry(self, fg='grey', width=30, font=("Arial", 10))
         self.matricula.insert(0, 'Informe a matrícula...')
@@ -273,14 +273,14 @@ class AtualizarBiometria(Frame):
         botao_confirmar.pack(pady=5)
         aplicar_hover(botao_confirmar, hover, verde)
 
-        botao_voltar_menu = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: self.controller.mostrar_tela(MenuProblemas))
+        botao_voltar_menu = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_matricula_infos.config(text="")])
         botao_voltar_menu.pack(pady=5)
         aplicar_hover(botao_voltar_menu, hover, botao2)
 
         self.texto_matricula_infos = Label(self, text="", bg="#ffffff", fg=cor_texto, font=("Arial", 13, "bold"), anchor="center", justify="center")
-        self.texto_matricula_infos.pack(pady=13, fill='x')
+        self.texto_matricula_infos.pack(pady=10, fill='x')
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(100, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(20, 10))
 
     def atualizar_bio(self):
         matricula_digitada = self.matricula.get()
@@ -768,7 +768,7 @@ class ConsultarVendaCaixa(Frame):
         self.controller = controller
 
         self.titulo_consulta = Label(self, text="Consulta de vendas no Caixa", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
-        self.titulo_consulta.pack(pady=(30,5))
+        self.titulo_consulta.pack(pady=(20,0))
 
         self.titulo_consulta = Label(self, text="Utilize a parametrização", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold", "underline"))
         self.titulo_consulta.pack(pady=5)
@@ -799,7 +799,7 @@ class ConsultarVendaCaixa(Frame):
         botao_consultar_venda.pack(pady=3)
         aplicar_hover(botao_consultar_venda, hover, verde)
 
-        botao_voltar_menu_consulta = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.erro_preenchimento.config(text="", fg="black")])
+        botao_voltar_menu_consulta = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.erro_preenchimento.config(text="", fg="black"), self.historico_vendas_aprovadas.config(text=""), self.historico_vendas_canceladas.config(text="")])
         botao_voltar_menu_consulta.pack(pady=(5,5))
         aplicar_hover(botao_voltar_menu_consulta, hover, botao2)
 
@@ -812,7 +812,7 @@ class ConsultarVendaCaixa(Frame):
         self.historico_vendas_canceladas = Label(frame_historico, text="", bg=vermelho, fg=cor_texto, font=("Arial", 10, "bold"), anchor="center", justify="center")
         self.historico_vendas_canceladas.pack(side="left", expand=True, fill='both')
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(15, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(1, 10))
 
     def consultar_vendas(self):
         data_digitada = self.inserir_data.get()
