@@ -804,7 +804,7 @@ class ConsultarVendaCaixa(Frame):
         aplicar_hover(botao_voltar_menu_consulta, hover, botao2)
 
         frame_historico = Frame(self)
-        frame_historico.pack(pady=(5,5), padx=10, fill="x")
+        frame_historico.pack(pady=(5,1), padx=10, fill="x")
 
         self.historico_vendas_aprovadas = Label(frame_historico, text="", bg=verde, fg=cor_texto, font=("Arial", 10, "bold"), anchor="center", justify="center")
         self.historico_vendas_aprovadas.pack(side="left", expand=True, fill='both')
@@ -812,7 +812,7 @@ class ConsultarVendaCaixa(Frame):
         self.historico_vendas_canceladas = Label(frame_historico, text="", bg=vermelho, fg=cor_texto, font=("Arial", 10, "bold"), anchor="center", justify="center")
         self.historico_vendas_canceladas.pack(side="left", expand=True, fill='both')
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(30, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(15, 10))
 
     def consultar_vendas(self):
         data_digitada = self.inserir_data.get()
