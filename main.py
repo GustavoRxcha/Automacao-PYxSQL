@@ -2,6 +2,7 @@ from tkinter import *
 from PIL import Image, ImageTk
 from Funcoes.funcoesloja import *
 from Funcoes.funcoescaixa import *
+from Funcoes.funcoeslinux import *
 from style.cores import *
 from dotenv import load_dotenv
 
@@ -30,8 +31,8 @@ class Aplicacao(Tk):
         self.telas = {}
                                                                                                
         for T in (Homepage, MenuProblemas, DataHub, AtualizarEstoque, AtualizarBiometria, IntegrarNota, AtualizarVersaoLoja, LimparTemp,                                    #<--LOJA
-                  HomepageCaixa, MenuProblemasCaixa, HabilitarCartaoPresente, AtualizarBiometriaCaixa, AtualizarVersaoCaixa, TabelaZeroCaixa,                               #<--CAIXA
-                  ConsultarVendaCaixa, HabilitarVNCCaixa, ErroMount_a, LeituraGravacao):                                                                                                                  #<--CAIXA
+                  HomepageCaixa, MenuProblemasCaixa, HabilitarCartaoPresente, AtualizarBiometriaCaixa, AtualizarVersaoCaixa, TabelaZeroCaixa, ConsultarVendaCaixa,          #<--CAIXA                                                                           #<--CAIXA
+                  MenuProblemasLinux, HabilitarVNCCaixa, ErroMount_a, LeituraGravacao,):                                                                                    #<--LINUX                                                  #<--LINUX
             tela = T(container, self)
             self.telas[T] = tela
             tela.grid(row=0, column=0, sticky="nsew")
@@ -59,11 +60,13 @@ class Homepage(Frame):
 
 
         topo_frame = Frame(self, bg=fundo)
-        topo_frame.pack(pady=(90,10))
+        topo_frame.pack(pady=(50,10))
 
         Label(topo_frame, text="Informe o número da ", fg=cor_texto, bg=fundo, font=("Arial", 13, "bold")).pack(side=LEFT)
         Label(topo_frame, text="FILIAL", fg=cor_texto, bg=fundo, font=("Arial", 13, "underline", "bold")).pack(side=LEFT)
     
+        self.texto_aviso_bio = Label(self, text="Realizar o PRIMEIRO acesso em um 'Menu LOJA'\nNecessário para liberar conexão com 'Menu CAIXA'", bg=fundo, fg=botao1, font=("Arial", 9, "bold"), bd=1, relief="solid")
+        self.texto_aviso_bio.pack(pady=15)
 
         self.entrada = Entry(self, fg='grey', width=30, font=("Arial", 11))
         self.entrada.insert(0, 'Digite aqui...')
@@ -71,24 +74,25 @@ class Homepage(Frame):
         self.entrada.pack(pady=13)
 
         self.botao_menu_loja = Button(self, text="Menu LOJA", width=15, height=1, bg=botao1, fg="#ffffff", bd=4, relief="ridge", font=("Arial", 10), command=lambda: self.conectar_banco_loja()).pack(pady=10)
-        self.botao_menu_caixa = Button(self, text="Menu CAIXA", width=15, height=1, bg=botao1, fg="#ffffff", bd=4, relief="ridge", font=("Arial", 10), command=lambda: self.conectar_banco_caixa()).pack(pady=10)
+        self.botao_menu_caixa = Button(self, text="Menu CAIXA SQL", width=15, height=1, bg=botao1, fg="#ffffff", bd=4, relief="ridge", font=("Arial", 10), command=lambda: self.conectar_banco_caixa()).pack(pady=10)
+        self.botao_menu_linux = Button(self, text="Menu LINUX", width=15, height=1, bg=botao1, fg="#ffffff", bd=4, relief="ridge", font=("Arial", 10), command=lambda: self.controller.mostrar_tela(MenuProblemasLinux)).pack(pady=10)
 
         self.texto_erro_selecionar_filial = Label(self, text="", fg=vermelho, bg=fundo, font=("Arial", 13, "bold"))
-        self.texto_erro_selecionar_filial.pack(pady=10, padx=40)
+        self.texto_erro_selecionar_filial.pack(pady=5, padx=40)
 
         aplicar_hover_em_todos(self, hover, botao1)
                
-        Label(self, image=self.controller.logo_tk).pack(pady=(70, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(20, 10))
 
     def confirmar_filial(self):
-        filial_digitada = self.entrada.get()
-        self.controller.filial = filial_digitada
+        self.filial_digitada = self.entrada.get()
+        self.controller.filial = self.filial_digitada
         self.entrada.delete(0, END)
 
-        if filial_digitada.strip() == "" or filial_digitada == "Digite aqui..." or filial_digitada == '0':
+        if self.filial_digitada.strip() == "" or self.filial_digitada == "Digite aqui..." or self.filial_digitada == '0':
             return
         
-        self.controller.ip = gerar_ip(filial_digitada)
+        self.controller.ip = gerar_ip(self.filial_digitada)
 
     def conexao_servidor(self):    
         ip_loja = self.controller.ip + "24"
@@ -97,23 +101,20 @@ class Homepage(Frame):
         self.controller.usuario_sql = os.getenv("USER_SQL")
         self.controller.senha_sql = os.getenv("PASS_SQL")
 
-        #ip_loja = 'localhost\SQLEXPRESS'
-
-        try:
-
-                self.controller.conn = pyodbc.connect(
-                    f'DRIVER={{ODBC Driver 17 for SQL Server}};'
-                    f'SERVER={ip_loja};'
-                    f'DATABASE=LOJA;'
-                    #'Trusted_Connection=yes;'
-                    f'UID={self.controller.usuario_sql};'
-                    f'PWD={self.controller.senha_sql};'
-                    'Connection Timeout=3;'
-                )
-                print("Conectado com sucesso ao banco!")
-                self.controller.mostrar_tela(MenuProblemas)
-                self.controller.ip = ""
-        except:
+        if len(ip_loja) > 5:
+            self.controller.conn = pyodbc.connect(
+                f'DRIVER={{ODBC Driver 17 for SQL Server}};'
+                f'SERVER={ip_loja};'
+                f'DATABASE=LOJA;'
+                f'UID={self.controller.usuario_sql};'
+                f'PWD={self.controller.senha_sql};'
+                'Connection Timeout=3;'
+            )
+            print("Conectado com sucesso ao banco!")
+            self.controller.mostrar_tela(MenuProblemas)
+            self.controller.ip = ""
+            self.texto_erro_selecionar_filial.config(text="")
+        else:
             self.texto_erro_selecionar_filial.config(text="Falha na conexão")
             return
 
@@ -127,6 +128,7 @@ class Homepage(Frame):
         if self.controller.ip.strip() == "" or self.controller.ip == "Digite aqui..." or self.controller.ip == '0':
             return
         self.controller.mostrar_tela(HomepageCaixa)
+        self.texto_erro_selecionar_filial.config(text="")
     
     def quando_clicar(self, event):
         if self.entrada.get() == 'Digite aqui...':
@@ -180,7 +182,7 @@ class MenuProblemas(Frame):
         aplicar_hover(botao_alterar_filial, hover, vermelho)
         botao_alterar_filial.pack(pady=(15, 5))
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(10, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(15, 10))
 
     def atualizar(self):
         filial = self.controller.filial
@@ -262,7 +264,7 @@ class AtualizarBiometria(Frame):
         self.controller = controller
 
         self.texto_matricula_titulo = Label(self, text="Informe a matrícula", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
-        self.texto_matricula_titulo.pack(pady=(40,20))
+        self.texto_matricula_titulo.pack(pady=(40,10))
     
         self.matricula = Entry(self, fg='grey', width=30, font=("Arial", 10))
         self.matricula.insert(0, 'Informe a matrícula...')
@@ -277,7 +279,7 @@ class AtualizarBiometria(Frame):
         botao_voltar_menu.pack(pady=5)
         aplicar_hover(botao_voltar_menu, hover, botao2)
 
-        self.texto_matricula_infos = Label(self, text="", bg="#ffffff", fg=cor_texto, font=("Arial", 13, "bold"), anchor="center", justify="center")
+        self.texto_matricula_infos = Label(self, text="", bg="#292929", fg=cor_texto, font=("Arial", 13, "bold"), anchor="center", justify="center")
         self.texto_matricula_infos.pack(pady=10, fill='x')
 
         Label(self, image=self.controller.logo_tk).pack(pady=(20, 10))
@@ -316,15 +318,15 @@ class IntegrarNota(Frame):
         self.chave_nfe.bind('<FocusIn>', self.quando_clicar)
         self.chave_nfe.pack(pady=13)
 
-        botao_confirmar = Button(self, text="Confirmar", width=15, height=1, bg="green", fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.integrar_nf)
-        botao_confirmar.pack(pady=5)
-        aplicar_hover(botao_confirmar, hover, verde)
+        #botao_confirmar = Button(self, text="Confirmar", width=15, height=1, bg="green", fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.integrar_nf)
+        #botao_confirmar.pack(pady=5)
+        #aplicar_hover(botao_confirmar, hover, verde)
 
         botao_voltar_menu = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemas), self.texto_integrar_infos.config(text="", fg='black')])
         botao_voltar_menu.pack(pady=5)
         aplicar_hover(botao_voltar_menu, hover, botao2)
 
-        self.texto_integrar_infos = Label(self, text="", bg="#ffffff", fg=cor_texto, font=("Arial", 13, "bold"), anchor="center", justify="center")
+        self.texto_integrar_infos = Label(self, text="", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"), anchor="center", justify="center")
         self.texto_integrar_infos.pack(pady=13, fill='x')
 
         Label(self, image=self.controller.logo_tk).pack(pady=(60, 10))
@@ -483,8 +485,8 @@ class HomepageCaixa(Frame):
         Frame.__init__(self, parent, bg=fundo)
         self.controller = controller
 
-        self.texto_selecionar_caixa = Label(self, text="Qual CAIXA será feita a conexão?", fg=cor_texto, bg=fundo, font=("Arial", 13, "bold"))
-        self.texto_selecionar_caixa.pack(pady=(90,30), padx=40)
+        self.texto_selecionar_caixa = Label(self, text=f"", fg=cor_texto, bg=fundo, font=("Arial", 13, "bold"))
+        self.texto_selecionar_caixa.pack(pady=(80,30), padx=40)
 
         self.entrada = Entry(self, fg='grey', width=30, font=("Arial", 11))
         self.entrada.insert(0, 'Digite aqui...')
@@ -495,14 +497,14 @@ class HomepageCaixa(Frame):
         botao_confirmar_caixa.pack(pady=5)
         aplicar_hover(botao_confirmar_caixa, hover, verde)
 
-        botao_alterar_filial = Button(self, text="Alterar filial", width=15, height=1, bg=botao2, fg='#ffffff', bd=3, relief="ridge", font=("Arial", 10),command=lambda: self.controller.mostrar_tela(Homepage))
+        botao_alterar_filial = Button(self, text="Alterar filial", width=15, height=1, bg=botao2, fg='#ffffff', bd=3, relief="ridge", font=("Arial", 10),command=lambda: [self.controller.mostrar_tela(Homepage), self.texto_erro_selecionar_caixa.config(text="")])
         botao_alterar_filial.pack(pady=5)
         aplicar_hover(botao_alterar_filial, hover, vermelho)
 
         self.texto_erro_selecionar_caixa = Label(self, text="", fg=vermelho, bg=fundo, font=("Arial", 13, "bold"))
-        self.texto_erro_selecionar_caixa.pack(pady=13, padx=40)
+        self.texto_erro_selecionar_caixa.pack(pady=10, padx=40)
 
-        Label(self, image=self.controller.logo_tk).pack(pady=(70, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(60, 10))
 
     def confirmar_caixa(self):
         self.controller.caixa_selecionado = self.entrada.get()
@@ -514,15 +516,12 @@ class HomepageCaixa(Frame):
         self.controller.ip_caixa = self.controller.ip + self.controller.caixa_selecionado
         print(self.controller.ip_caixa)
 
-        #self.controller.ip_caixa = 'localhost\SQLEXPRESS'
-
         try:
-            if len(self.controller.caixa_selecionado) < 2 and self.controller.caixa_selecionado != None:
+            if len(self.controller.caixa_selecionado) < 2 and len(self.controller.ip_caixa) > 5 and self.controller.caixa_selecionado != None:
                 self.controller.conn = pyodbc.connect(
                     f'DRIVER={{ODBC Driver 17 for SQL Server}};'
                     f'SERVER={self.controller.ip_caixa};'
-                    f'DATABASE=PDV;' #PDV-LOJA
-                    #'Trusted_Connection=yes;'
+                    f'DATABASE=PDV;'
                     f'UID={self.controller.usuario_sql};'
                     f'PWD={self.controller.senha_sql};'
                     'Connection Timeout=3;'
@@ -531,11 +530,15 @@ class HomepageCaixa(Frame):
                 self.controller.mostrar_tela(MenuProblemasCaixa)
                 self.texto_erro_selecionar_caixa.config(text="")
             else:
-                self.texto_erro_selecionar_caixa.config(text="Número de CAIXA inválido!")
+                self.texto_erro_selecionar_caixa.config(text="Número de CAIXA ou FILIAL inválido!")
                 return
         except:
             self.texto_erro_selecionar_caixa.config(text="Falha na conexão com o banco.")
     
+    def atualizar(self):
+        filial = self.controller.filial
+        self.texto_selecionar_caixa.config(text=f"Qual CAIXA será feita a conexão?\n\nFilial: {filial}")
+
     def quando_clicar(self, event):
         if self.entrada.get() == 'Digite aqui...':
             self.entrada.delete(0, END)
@@ -560,9 +563,9 @@ class MenuProblemasCaixa(Frame):
             ("Habilitar\ncartão presente", lambda: self.controller.mostrar_tela(HabilitarCartaoPresente)),
             ("Atualizar Versão\nPDV", lambda: self.controller.mostrar_tela(AtualizarVersaoCaixa)),
             ("Verificar Vendas", lambda: self.controller.mostrar_tela(ConsultarVendaCaixa)),
-            ("Habilitar VNC", lambda: self.controller.mostrar_tela(HabilitarVNCCaixa)),
-            ("Mount -a", lambda: self.controller.mostrar_tela(ErroMount_a)),
-            ("Leitura e Gravação", lambda: self.controller.mostrar_tela(LeituraGravacao)),
+            ("---------", lambda: self.controller.mostrar_tela(MenuProblemasCaixa)),
+            ("---------", lambda: self.controller.mostrar_tela(MenuProblemasCaixa)),
+            ("---------", lambda: self.controller.mostrar_tela(MenuProblemasCaixa)),
         ]
 
         for i, (texto, comando) in enumerate(botoes):
@@ -841,6 +844,59 @@ class ConsultarVendaCaixa(Frame):
             self.inserir_valor.delete(0, END)
             self.inserir_valor.config(fg='black')
 
+#########################LINUX - LINUX - LINUX################################################################
+#########################LINUX - LINUX - LINUX################################################################
+#########################LINUX - LINUX - LINUX################################################################
+#########################LINUX - LINUX - LINUX################################################################
+#########################LINUX - LINUX - LINUX################################################################
+#########################LINUX - LINUX - LINUX################################################################
+#########################LINUX - LINUX - LINUX################################################################
+#########################LINUX - LINUX - LINUX################################################################
+#########################LINUX - LINUX - LINUX################################################################
+#########################LINUX - LINUX - LINUX################################################################
+
+class MenuProblemasLinux(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg=fundo)
+        self.controller = controller
+
+        self.texto_menu_linux = Label(self, text="CORREÇÕES DE PROBLEMAS LINUX", font=("Arial", 10, "bold"), bg=fundo, fg=cor_texto)
+        self.texto_menu_linux.pack(pady=(40, 10))
+
+        botoes_frame = Frame(self, bg=fundo)
+        botoes_frame.pack()
+
+        botoes = [
+            ("Leitura e Gravação", lambda: self.controller.mostrar_tela(LeituraGravacao)),
+            ("Mount -a", lambda: self.controller.mostrar_tela(ErroMount_a)),
+            ("Habilitar VNC", lambda: self.controller.mostrar_tela(HabilitarVNCCaixa)),
+            ("---------", lambda: self.controller.mostrar_tela(MenuProblemasLinux)),
+            ("---------", lambda: self.controller.mostrar_tela(MenuProblemasLinux)),
+            ("---------", lambda: self.controller.mostrar_tela(MenuProblemasLinux)),
+            ("---------", lambda: self.controller.mostrar_tela(MenuProblemasLinux)),
+            ("---------", lambda: self.controller.mostrar_tela(MenuProblemasLinux)),      
+        ]
+
+        for i, (texto, comando) in enumerate(botoes):
+            linha = i // 2
+            coluna = i % 2
+
+            Button(botoes_frame, text=texto, width=20, height=2, bg=botao1, fg="white", bd=3, relief="ridge", font=("Arial", 8, "bold"), command=comando).grid(row=linha, column=coluna, padx=13, pady=6, sticky="nsew")
+            aplicar_hover_em_todos(botoes_frame, hover, botao1)
+        #ajuste proporção
+        botoes_frame.grid_columnconfigure(0, weight=1)
+        botoes_frame.grid_columnconfigure(1, weight=1)
+
+        frame_alteracoes = Frame(self, bg=fundo)
+        frame_alteracoes.pack(pady=(13, 6))
+
+        botao_alterar_filial = Button(frame_alteracoes, text="Alterar filial", width=21, height=3, bg=vermelho, fg="white", bd=3, relief="ridge", font=("Arial", 9, "bold"), command=lambda: alterar_filial(self, Homepage))
+        aplicar_hover(botao_alterar_filial, hover, vermelho)
+        botao_alterar_filial.pack(side="left", padx=6)
+
+        Label(self, image=self.controller.logo_tk).pack(pady=(20, 20))
+        
+
 #########################################################################################
 
 class HabilitarVNCCaixa(Frame):
@@ -851,11 +907,16 @@ class HabilitarVNCCaixa(Frame):
         self.texto_titulo_habilitar = Label(self, text="Habilitar conexão VNC no Caixa", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
         self.texto_titulo_habilitar.pack(pady=(90,20))
 
+        self.inserir_ip_vnc = Entry(self, fg='grey', width=30, font=("Arial", 11))
+        self.inserir_ip_vnc.insert(0, 'Informe o IP...')
+        self.inserir_ip_vnc.bind('<FocusIn>', self.quando_clicar)
+        self.inserir_ip_vnc.pack(pady=(1, 5))
+
         botao_habilitar_vnc = Button(self, text="Habilitar VNC", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.habilitar_vnc)
         botao_habilitar_vnc.pack(pady=5)
         aplicar_hover(botao_habilitar_vnc, hover, verde)
 
-        botao_voltar_menu_vnc = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_vnc.config(text="")])
+        botao_voltar_menu_vnc = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasLinux), self.texto_status_vnc.config(text="")])
         botao_voltar_menu_vnc.pack(pady=13)
         aplicar_hover(botao_voltar_menu_vnc, hover, botao2)
 
@@ -865,12 +926,23 @@ class HabilitarVNCCaixa(Frame):
         Label(self, image=self.controller.logo_tk).pack(pady=(100, 10))
 
     def habilitar_vnc(self):
+        ip_digitado = self.inserir_ip_vnc.get().strip()
+            
+        if not ip_digitado or ip_digitado == "Informe o IP...":
+            self.texto_status_vnc.config(text="IP inválido.", fg="red")
+            return
 
         try:
-            iniciar_vnc(self.controller.ip_caixa)
-            self.texto_status_vnc.config(text="VNC habilitado para acessar terminal!", fg=verde)
-        except:
-            self.texto_status_vnc.config(text="ERRO ao habilitar VNC no caixa\n\nVerificar com FIlial.", fg=vermelho)
+            resultado = iniciar_vnc(ip_digitado)
+            self.texto_status_vnc.config(text=resultado, fg=cor_texto)
+            self.inserir_ip_vnc.delete(0, END)
+        except Exception as e:
+            self.texto_status_vnc.config(text=f"Erro inesperado: \n{str(e)}", fg="red")
+
+    def quando_clicar(self, event):
+        if self.inserir_ip_vnc.get() == 'Informe o IP...':
+            self.inserir_ip_vnc.delete(0, END)
+            self.inserir_ip_vnc.config(fg='black')
 
 #########################################################################################
 
@@ -882,11 +954,16 @@ class ErroMount_a(Frame):
         self.texto_mount = Label(self, text="Erro de diretório PBM\n(Mount -a)", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
         self.texto_mount.pack(pady=(90,20))
 
+        self.inserir_ip_mount = Entry(self, fg='grey', width=30, font=("Arial", 11))
+        self.inserir_ip_mount.insert(0, 'Informe o IP...')
+        self.inserir_ip_mount.bind('<FocusIn>', self.quando_clicar)
+        self.inserir_ip_mount.pack(pady=(1, 5))
+
         botao_mount = Button(self, text="Corrigir", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.corrigir_mount_a)
         botao_mount.pack(pady=5)
         aplicar_hover(botao_mount, hover, verde)
 
-        botao_voltar_menu_mount = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_mount.config(text="")])
+        botao_voltar_menu_mount = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasLinux), self.texto_status_mount.config(text="")])
         botao_voltar_menu_mount.pack(pady=13)
         aplicar_hover(botao_voltar_menu_mount, hover, botao2)
 
@@ -894,15 +971,26 @@ class ErroMount_a(Frame):
         self.texto_status_mount.pack(pady=13)
 
         
-        Label(self, image=self.controller.logo_tk).pack(pady=(100, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(80, 10))
 
     def corrigir_mount_a(self):
+        ip_digitado = self.inserir_ip_mount.get().strip()
+            
+        if not ip_digitado or ip_digitado == "Informe o IP...":
+            self.texto_status_mount.config(text="IP inválido.", fg="red")
+            return
 
         try:
-            mount_a(self.controller.ip_caixa)
-            self.texto_status_mount.config(text="Efetuado 'mount -a', Caixa corrigido.", fg=verde)
-        except:
-            self.texto_status_mount.config(text="ERRO ao executar o script, verificar problema.", fg=vermelho)
+            resultado = mount_a(ip_digitado)
+            self.texto_status_mount.config(text=resultado, fg=cor_texto)
+            self.inserir_ip_mount.delete(0, END)
+        except Exception as e:
+            self.texto_status_mount.config(text=f"Erro inesperado: \n{str(e)}", fg="red")
+
+    def quando_clicar(self, event):
+        if self.inserir_ip_mount.get() == 'Informe o IP...':
+            self.inserir_ip_mount.delete(0, END)
+            self.inserir_ip_mount.config(fg='black')
 
 #########################################################################################
 
@@ -914,26 +1002,93 @@ class LeituraGravacao(Frame):
         self.texto_permissao = Label(self, text="Ativar permissões no PDV\nLeitura e Gravação", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
         self.texto_permissao.pack(pady=(70,20))
 
+        self.inserir_ip_permissao = Entry(self, fg='grey', width=30, font=("Arial", 11))
+        self.inserir_ip_permissao.insert(0, 'Informe o IP...')
+        self.inserir_ip_permissao.bind('<FocusIn>', self.quando_clicar)
+        self.inserir_ip_permissao.pack(pady=(1, 5))
+
         botao_permissao = Button(self, text="Ativar", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.ativar_permissao)
         botao_permissao.pack(pady=5)
         aplicar_hover(botao_permissao, hover, verde)
 
-        botao_voltar_menu_permissao = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasCaixa), self.texto_status_permissao.config(text="")])
+        botao_voltar_menu_permissao = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasLinux), self.texto_status_permissao.config(text="")])
         botao_voltar_menu_permissao.pack(pady=13)
         aplicar_hover(botao_voltar_menu_permissao, hover, botao2)
 
         self.texto_status_permissao = Label(self, text="", bg=fundo, font=("Arial", 10, "bold"))
         self.texto_status_permissao.pack(pady=10)
   
-        Label(self, image=self.controller.logo_tk).pack(pady=(90, 10))
+        Label(self, image=self.controller.logo_tk).pack(pady=(80, 10))
 
     def ativar_permissao(self):
+            ip_digitado = self.inserir_ip_permissao.get().strip()
+            
+            if not ip_digitado or ip_digitado == "Informe o IP...":
+                self.texto_status_permissao.config(text="IP inválido.", fg="red")
+                return
+        
+            try:
+                resultado = leitura_gravação(ip_digitado)
+                self.texto_status_permissao.config(text=resultado, fg=cor_texto)
+                self.inserir_ip_permissao.delete(0, END)
+            except Exception as e:
+                self.texto_status_permissao.config(text=f"Erro inesperado: \n{str(e)}", fg="red")
 
-        try:
-            leitura_gravação(self.controller.ip_caixa)
-            self.texto_status_permissao.config(text="Ativado as permissões no caixa\n\nLeitura e Gravação ✓ ", fg=verde)
-        except:
-            self.texto_status_permissao.config(text="ERRO ao executar o script, verificar problema no PDV.", fg=vermelho)
+    def quando_clicar(self, event):
+        if self.inserir_ip_permissao.get() == 'Informe o IP...':
+            self.inserir_ip_permissao.delete(0, END)
+            self.inserir_ip_permissao.config(fg='black')
+
+#########################################################################################
+
+class ConfigurarCaixa(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent, bg=fundo)
+        self.controller = controller
+
+        self.titulo_configurar_caixa = Label(self, text="Configurar Caixas", bg=fundo, fg=cor_texto, font=("Arial", 13, "bold"))
+        self.titulo_configurar_caixa.pack(pady=(20,0))
+
+        self.inserir_ip = Entry(self, fg='grey', width=30, font=("Arial", 11))
+        self.inserir_ip.insert(0, 'Informe o IP...')
+        self.inserir_ip.bind('<FocusIn>', self.quando_clicar)
+        self.inserir_ip.pack(pady=(1, 1))
+
+        self.inserir_uf = Entry(self, fg='grey', width=30, font=("Arial", 11))
+        self.inserir_uf.insert(0, 'Informe a UF...')
+        self.inserir_uf.bind('<FocusIn>', self.quando_clicar)
+        self.inserir_uf.pack(pady=(1, 1))
+
+        self.inserir_caixa = Entry(self, fg='grey', width=30, font=("Arial", 11))
+        self.inserir_caixa.insert(0, 'Informe o número do Caixa...')
+        self.inserir_caixa.bind('<FocusIn>', self.quando_clicar)
+        self.inserir_caixa.pack(pady=(1, 1))
+
+        self.informacoes_config = Label(self, text="", bg=fundo, fg=cor_texto, font=("Arial", 10, "bold"), anchor="center", justify="center")
+        self.informacoes_config.pack(pady=3, fill='x')
+
+        botao_consultar_venda = Button(self, text="Consultar Venda", width=15, height=1, bg=verde, fg="#ffffff", bd=3, relief="ridge", font=("Arial", 10), command=self.consultar_vendas)
+        botao_consultar_venda.pack(pady=3)
+        aplicar_hover(botao_consultar_venda, hover, verde)
+
+        botao_voltar_menu_consulta = Button(self, text="Voltar para Menu", width=15, height=1, bg=botao2, fg=cor_texto, bd=3, relief="ridge", font=("Arial", 11), command=lambda: [self.controller.mostrar_tela(MenuProblemasLinux), self.informacoes_config.config(text="")])
+        botao_voltar_menu_consulta.pack(pady=(5,5))
+        aplicar_hover(botao_voltar_menu_consulta, hover, botao2)
+
+        Label(self, image=self.controller.logo_tk).pack(pady=(1, 10))
+
+    def quando_clicar(self, event):
+        if self.inserir_data.get() == 'Informe o IP...':
+            self.inserir_data.delete(0, END)
+            self.inserir_data.config(fg='black')
+
+        if self.inserir_valor.get() == 'Informe a UF...':
+            self.inserir_valor.delete(0, END)
+            self.inserir_valor.config(fg='black')
+
+        if self.inserir_valor.get() == 'Informe o número do Caixa...':
+            self.inserir_valor.delete(0, END)
+            self.inserir_valor.config(fg='black')
 
 #########################################################################################
 

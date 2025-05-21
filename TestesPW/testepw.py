@@ -173,4 +173,4 @@ def leitura_gravação(ip_servidor):
     finally:
         cliente_ssh.close()
 
-leitura_gravação('10.16.4.2')
+leitura_gravação('10.16.7.1')

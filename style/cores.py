@@ -1,14 +1,14 @@
 from tkinter import Button
 
-fundo = '#f9fafb'
-cor_texto = '#1f2937'
-botao1 = '#6366f1'
-botao2 = '#a5b4fc'
-hover = '#7c3aed'
+fundo = '#292929'
+cor_texto = '#f0f6fc'
+botao1 = '#7150cd'
+botao2 = "#6b7fe2"
+hover = "#948be2"
 borda = '#d1d5db'
-tags = '#6366f1'
-vermelho = '#f87171'
-verde = '#10b981'
+tags = "#7577f1"
+vermelho = '#e64a19'
+verde = '#398636'
 
 def aplicar_hover(botao, cor_hover, cor_normal):
     botao.bind("<Enter>", lambda e: e.widget.config(bg=cor_hover))

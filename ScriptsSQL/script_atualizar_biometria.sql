@@ -7,21 +7,6 @@ DECLARE @MATRICULA VARCHAR(MAX) = ? --- Insira a matrícula do colaborador.
 	   ,@COMANDO   NVARCHAR(MAX)
 	   ,@LOJA	   VARCHAR(3)			
 
-IF LEN(@MATRICULA) <> 5
-BEGIN
-	RAISERROR('O valor da variável ''@matricula'' não pode ser diferente de cinco caracteres. Insira um número válido.', 16, 1) WITH NOWAIT
-END
-ELSE BEGIN
-	IF ISNUMERIC(@MATRICULA) = 1 AND
-				 @MATRICULA <> ''
-	BEGIN
-		SET @MATRICULA = CONVERT(NUMERIC, @MATRICULA)
-	END
-	ELSE BEGIN
-		RAISERROR('O valor da variável ''@matricula'' não pode ser uma string. Insira um número válido.', 16, 1) 
-	END
-END
-
 BEGIN TRY
 	IF EXISTS (SELECT * FROM OPERADORES WHERE OPERADOR = @MATRICULA)
 	   DELETE FROM OPERADORES WHERE OPERADOR = @MATRICULA

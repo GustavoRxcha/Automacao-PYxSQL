@@ -35,6 +35,7 @@ def gerar_ip(filial):
 
 def alterar_filial(self, home):
     self.controller.filial = ""  # Zera a filial/IP
+    self.controller.ip = "111"
     self.controller.mostrar_tela(home)
 
 # --------------------------------------------------------------------------------
@@ -149,7 +150,7 @@ def atualizar_biometria(conn, matricula):
         
         return f"Matrícula: {numero_matricula} foi atualizada!\n{nome} \n\nAbertura de Caixa: {'Sim' if abertura_caixa == 'S' else 'Não'} \nFechamento de Caixa: {'Sim' if fechamento_caixa == 'S' else 'Não'} \nCancelamento de Cupom: {'Sim' if cancelamento_cupom == 'S' else 'Não'} \nSangria de Caixa: {'Sim' if sangria_caixa == 'S' else 'Não'} \nSupervisor: {'Sim' if supervisor == 'S' else 'Não'}"
     else:
-        return f"Nenhum colaborador encontrado com a matrícula {matricula}"
+        return f"Nenhum colaborador encontrado\ncom a matrícula {matricula}"
 
     cursor.close()
 
